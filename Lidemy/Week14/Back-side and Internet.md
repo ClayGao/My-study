@@ -197,7 +197,7 @@
 
     - 如何購買網域 ?
 
-        ![GoDADDY](https://tw.godaddy.com/offers/domains/godaddycom?isc=gofktw06&countryview=1&currencyType=TWD&gclid=Cj0KCQjwjrvpBRC0ARIsAFrFuV-nr6P4xX8bDM57WD8uc7woomvLUd_PHMNPjGATKB1PojKQyYdPtDYaArKiEALw_wcB&gclsrc=aw.ds)
+        [GoDADDY](https://tw.godaddy.com/offers/domains/godaddycom?isc=gofktw06&countryview=1&currencyType=TWD&gclid=Cj0KCQjwjrvpBRC0ARIsAFrFuV-nr6P4xX8bDM57WD8uc7woomvLUd_PHMNPjGATKB1PojKQyYdPtDYaArKiEALw_wcB&gclsrc=aw.ds)
 
         在搜尋列輸入你想要的網域名，它就會顯示價錢給你
 
