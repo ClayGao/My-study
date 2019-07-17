@@ -141,7 +141,9 @@
 
     Internet -> Load Balancer -> [ PHP-01, PHP-02..]
 
-    
+    Load Banlancer 本身也是有可能壞掉的，這邊有同學問到這個問題
+
+    但應該是有其他方式避免，理論上 LB 壞掉就全壞了。
 
 
 - 怎麼管理伺服器？（我跟別人租的伺服器）
@@ -172,6 +174,51 @@
         原理：先連到某台主機，再用那台主機連到外面
 
         所以可以翻牆
+
+#資料庫
+
+- 資料庫備份 ( Replication )
+
+    比如說我有一個主資料庫叫做 P01，P01 存東西的時候都會將資料寫入一個叫做 P02 的資料庫，P02 伺服器也有機制當 P02 資料庫被寫入時，也會同時將資料寫入 P03 之中
+
+    而當 P01 要讀取資料時，會自動讀 P03 內的資料，也就是說 P01 寫入到 P02，讀是讀 P03
+
+    如此這樣 P01 的資料庫壓力就比較不會這麼大
+
+    另外另一個通例就是讀多寫少，比如說你 IG 也是看文多，發文少，這時候這種架構就不會讓主機壓力過大，這就是讀寫分離
+
+- 資料庫高可用性 ( High Availability )
+
+    ![](./dbha.jpg)
+
+    簡單來說永遠都要有 B 計畫，這個機制是說 A 主機掛掉，資料要求就會導到 B 主機，這時候就可以專心修 A 主機
+
+- Q&A
+
+    - 如何購買網域 ?
+
+        ![GoDADDY](https://tw.godaddy.com/offers/domains/godaddycom?isc=gofktw06&countryview=1&currencyType=TWD&gclid=Cj0KCQjwjrvpBRC0ARIsAFrFuV-nr6P4xX8bDM57WD8uc7woomvLUd_PHMNPjGATKB1PojKQyYdPtDYaArKiEALw_wcB&gclsrc=aw.ds)
+
+        在搜尋列輸入你想要的網域名，它就會顯示價錢給你
+
+        .com -> 公司行號
+
+        .com.tw -> 台灣的公司行號
+
+        價格的決定是網域供應商自己決定的，這個價錢算是一年的
+
+    - 虛擬主機供應商 ( cloud )
+
+        - Digital Ocean
+
+            Products : Droplets 可以觀看產品
+
+        - Amazon　AWS
+
+            也提供不少雲端主機，教學在課程介紹有
+
+            
+    
 
     
 
