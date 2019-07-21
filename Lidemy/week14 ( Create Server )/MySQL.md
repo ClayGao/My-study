@@ -110,7 +110,7 @@ Stored Routines 的應用，可以想像成一個腳本，從字面意思上就�
 由於 SQL 指令都是一行一行執行，Stored Routines 的功能就是 CREATE 一個腳本，讓我們可以一次執行 / 呼叫 ( CALL ) **數行**指令
 
 *******
-## Stored procedures
+# Stored procedures
 
 Stored procedures 是 Stored Routines 的一種具體實現的方式
 
@@ -121,7 +121,7 @@ CALL new_fruits('APPLE')
 ```
 *******
 
-### 建立 Stored procedures
+## 建立 Stored procedures
 
 ```
 DELIMITER // <-- DELIMITER 為重新定義結束符號 ( 原為 ; )
@@ -135,20 +135,20 @@ END // <-- 結尾要加上 // 以表示結束
 
 *******
 
-### 刪除 Stored procedures
+## 刪除 Stored procedures
 
 ```
 DROP PROCEDURE [IF EXISTS] [proc_name] 
 ```
 *******
 
-### 呼叫 Stored procedures
+## 呼叫 Stored procedures
 
 ```
 CALL [proc_name] ([參數)
 ```
 *******
-## Stored functions
+# Stored functions
 
 Stored Routines 提供的另一種元件，可以建立「自定義的函式」，看看下列例子
 
@@ -158,19 +158,55 @@ CREATE FUNCTION [fun_name] ... RETURNS double(40, 3)
 此函式固定將一個引數數值四捨五入到小數第三位
 
 *******
-### 建立 Stored functions
+## 建立 Stored functions
 
 ```
-CREATE FUNCTION [func_name] ([參數[,...]]) RETURNS 回傳型態
-as
-Return
-(
+CREATE FUNCTION [func_name] ([參數1 參數1型態], [參數2 參數2型態])
+RETURNS 回傳型態
+BEGIN
     Function 程式碼
-)
+END
+```
+*******
+
+## 使用 Stored functions
+
+使用時也要按照參數規格，比如說我建立一個 FUNCTION
+
+```
+DELIMITER //
+
+CREATE FUNCTION num_sum (num_a INT, num_b INT)
+RETURNS INT
+BEGIN
+    num_a + num_b;
+END
+
+DELIMITER ;
+```
+
+那下列兩種使用方法是錯誤的:
+
+1. 參數數量錯誤
+```
+-- 少一個參數
+SELECT num_sum(4)
+
+-- 多一個參數
+SELECT num_sum(4, 8, 7)
+```
+
+2. 參數型態錯誤
+```
+-- 型態錯誤
+SELECT num_sum('A', 'apple')
+
+-- 型態錯誤，仍是字串
+SELECT num_sum('4', '8')
 ```
 
 *******
-### 刪除 Stored functions
+## 刪除 Stored functions
 
 ```
 DROP FUNCTION [IF EXISTS] [func_name] 
@@ -178,15 +214,7 @@ DROP FUNCTION [IF EXISTS] [func_name]
 
 *******
 
-### 呼叫 Stored functions
-
-```
-SELECT * FROM [fun_name](參數)
-```
-
-*******
-
-## 小總結
+# 小總結
 
 Stored Routines 其實就是 Stored procedures 與 Stored functions 的合稱
 
@@ -207,35 +235,101 @@ Stored Routines 其實就是 Stored procedures 與 Stored functions 的合稱
 
 這時候可以使用「triggers」，中文稱之為「觸發器」，用途是：
 
-先將一些特定要執行的狀況儲存，而資料庫會在**正確的時機點**執行之。
+**先將一些特定要執行的狀況儲存 ( event )，而資料庫會在正確的時機點 ( time )執行之。**
+
+意思就是我可以針對 table 掛一個觸發器，這個觸發器有觸發條件，當條件觸發後我可以執行敘述
 
 ## 建立 trigger 元件
 
 ```
-CREATE TRIGGER [trig_name] [time] [event] ON [table_name] FOR EACH ROW 
+CREATE TRIGGER [trigger_name] [time] [event] ON [table_name] FOR EACH ROW 
 BEGIN
-    敘述....
+    [stmt]...
 END
 ```
-[time] : trigger 的啟動時機
-[event] : 如 INSERT / UPDATE / DELETE，指定啟動的事件
-[table_name] : 指定此 trigger 作用的表格
-[敘述] : trigger 執行的工作，有 BEGIN 與 END 區塊
+
+- [trigger_name] : 該觸發器的名稱，必須是唯一的不可重複
+
+- [time] : trigger 的啟動時機，只有 BEFORE / AFTER 兩種，前者是 [event] 之前，後者反之
+
+- [event] : 如 INSERT / UPDATE / DELETE，指定啟動的事件
+
+    其實可以直接將 [time] 和 [event] 綜合一起看
+
+    trigger 元件 : 每一個表格最多可以建立**六種**trigger事件，每一種僅能一個
+
+    - BEFORE <-- [time] INSERT <-- [event]
+    - BEFORE UPDATE
+    - BEFORE DELETE
+    - AFTER INSERT
+    - AFTER UPDATE
+    - AFTER DELETE
+
+
+- [table_name] : 對哪個 table 掛觸發器
+
+- [stmt] : 敘述，簡單來說就是當事件被觸發時我要幹嘛的意思，注意不可用和 transaction 相關的敘述
+
+可以用 Javascript 的 addEventLister 理解，比如說 
+```javascript
+aaa.addEventLister("click",function printTarget(e) {
+    console.log(e.target)
+})
+```
+可以簡單理解是
+```php
+DELIMITER //
+
+CREATE TRIGGER printTarget AFTER CLICK ON aaa FOR EACH ROW
+BEGIN
+    console.log(e.target);
+END
+
+DELIMITER ;
+// 當然實際中沒有這種用法，只是概念理解而已
+```
+**要注意的是，如果資料庫發現觸發事件並沒有真的成立，也就是沒有執行成功，那麼也不會執行敘述裡面的東西**
 
 *******
 
-trigger 元件 : 每一個表格最多可以建立**六種**trigger，每一種僅能一個
+## 查看 triggers
 
-- BEFORE INSERT
-- BEFORE UPDATE
-- BEFORE DELETE
-- AFTER INSERT
-- AFTER UPDATE
-- AFTER DELETE
+phpmyadmin 中的「觸發器」頁面，這邊也可以直接設定
 
-******
+*******
 
-待補..
+## 刪除 trigger
+
+```
+DROP PROCEDURE [IF EXISTS] [trigger_name] 
+```
+
+**如果你要修改該 trigger 的敘述，必須先刪除該 trigger 再新增新的
+
+*******
 
 
+# 關於 Stored Procedures 的討論
 
+- [討論一](https://www.facebook.com/groups/616369245163622/permalink/1315254285275111/)：
+
+    - Stored Procedures 不應該處理所有的程式邏輯，如此一但有 Bug，找起來會很麻煩
+    - 承上，還有另一個問題是如果都寫在 Stored Procedures 會造成效能過載
+    - 有再次提到大型系統中，資料庫會建立「讀寫分流」與「cluster」
+    - 資料庫的資源是很珍貴的
+
+- [討論二](https://www.facebook.com/groups/616369245163622/permalink/1316314398502433/)
+
+    - 這份討論的主內文是對於 Stored Procedures 的優點做討論，有提到在高階後端會盡量將運算和儲存弄在一個機器
+    - 嗯...其他看不是很懂，如果有看懂再補上
+
+- [討論三](https://www.facebook.com/groups/616369245163622/permalink/1315406481926558/)
+
+    - Stored Procedures 寫出來之後要更動內容非常困難
+    - 承上，所以程式邏輯不該寫在 Stored Procedures 之中
+    - Stored Procedures 基本上來說是無法做單元測試的
+    - 在後端中寫東西不論成功或者出錯盡量都要有 log 可以看，但是 Stored Procedures 無法顯示出 log
+
+- [討論四](https://www.facebook.com/yftzeng.tw/posts/10209307179835921)
+
+    - 討論四中已整理好，可以直接點進去看
