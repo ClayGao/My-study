@@ -1,10 +1,18 @@
+# 前言
+
+這份文章的內容是給「完全沒架過自己網站的使用者」看的
+
+所以裡面的內容不會太深，大概就是教學如何操作而已，所以歡迎大家也可以去找其他資料補架站相關的知識
+
+謝謝！
+
 # 事前準備
 
 相信大家都有 Google 帳號，然後 Google 搜尋 GCP
 
 或可以點選[這裡](https://ephrain.net/gcp-%E4%BD%BF%E7%94%A8-gcloud-%E9%80%A3%E7%B7%9A%E5%88%B0-google-cloud-platform-%E4%B8%8A%E7%9A%84-vm/)
 
-大概簡單介紹一下 GCP ( 文章編寫日期 2019 / 07 /18 )
+大概簡單介紹一下 GCP 
 
 它的優點是機房設在台灣，整體來說比 AWS 便宜一點，速度也比較快
 
@@ -58,6 +66,8 @@
 
 一開始進來這個畫面，需要等它讀取完成，所以要等一下，不是當機唷
 
+讀取完按鈕便可選之後，選擇「建立」
+
 ![](./gcp/12.jpg)
 
 *******
@@ -66,7 +76,7 @@
 
 ![](./gcp/13.jpg)
 
-名稱 : 這邊沒有特別規定，我自己是打 myboard
+名稱 : 這邊要小寫
 
 區域 : 有台灣可以選就選台灣啦
 
@@ -126,7 +136,7 @@
 
 或者你也可以使用自己的終端機，這邊有前輩 EPH 撰寫的[MACOS 用如何用終端機連線到 Google Cloud Platform 上的 VM](https://ephrain.net/gcp-%E4%BD%BF%E7%94%A8-gcloud-%E9%80%A3%E7%B7%9A%E5%88%B0-google-cloud-platform-%E4%B8%8A%E7%9A%84-vm/)
 
-***以下我們直接用 GCP 內建的 Cloud Shell 操作*** ( 未來應該還是會搭配 gCloud SDK 用自己的 Terminal )
+***以下我們直接用 GCP 內建的 Cloud Shell 操作*** ( 最下面有教學以 cmder 連線 VM 也可參考 )
 
 *******
 
@@ -182,6 +192,8 @@ $pwd //home/你的帳號名稱
 
 ![](./gcp/22.jpg)
 
+var 這個資料夾裡面是我們等等要使用的地方
+
 ******
 
 使用 cd 切換到 /var/www/html 底下之後可以看到 index.html，這個頁面就是我們剛剛安裝 Apache 成功之後看到的首頁
@@ -215,6 +227,9 @@ sudo apt-get install mysql-server php7.0-mysql php-pear
 ```php
 sudo mysql_secure_installation
 ```
+這邊內容待補
+
+*******
 
 ## 安裝 phpMyAdmin ( 可選但建議安裝 )
 
@@ -346,8 +361,9 @@ drwxr-xr-x 就是目前的權限，「-」的部分是被遮蓋掉的
 
 若要回到原本權限，可輸入下列指令
 
-> sudo chmod 755 -R /var/www
-
+```
+sudo chmod 755 -R /var/www
+```
 ******
 
 # 加入 GitHub repo
@@ -358,5 +374,123 @@ drwxr-xr-x 就是目前的權限，「-」的部分是被遮蓋掉的
 
 如果你沒有執行剛剛的開啟權限的話，git clone 會有以下回覆，表示權限不夠 ( Permission denied )
 
-> fatal: could not create work tree dir 'mentor-program-3rd-ClayGao': Permission denied
+```
+fatal: could not create work tree dir 'mentor-program-3rd-ClayGao': Permission denied
+```
+
+# 使用本地 CLI 操控 VM，而不是用瀏覽器 Cloud Shell
+
+在上述的步驟中，都是使用 GCP 內建的小黑窗，這邊直接操作一次如何用 Windows 的 cmder 來遠端處理虛擬機
+
+在這之前你可以搭配[官方文件](https://cloud.google.com/sdk/docs/quickstart-windows)一起看。
+
+## 安裝 Google Cloud SDK
+
+首先下載 Google Cloud SDK，可以從官方文件裡面看到連結
+
+安裝部分直接都點下一步就好 ( 或者你也可以安裝在 Dropbox，如果你有多台電腦需求 )
+
+完成之後應該會跳出一個安裝完成視窗，四個勾都打勾 ( 預設是勾好的 )，完成之後就會跳出一個小黑窗
+
+這個是它自動幫你呼叫的 Windows 內建 cmd，可以關掉，然後打開 cmder
+
+輸入
+
+```
+gcloud init
+```
+會顯示
+
+> You must log in to continue. Would you like to log in (Y/n)?
+
+選擇 y，就會跳出瀏覽器讓你選擇你的 google 帳號
+
+選擇並允許之後，就會跳出以下視窗
+
+![](./gcp/32.jpg)
+
+如此就可以在 cmder 上使用 gcloud 了 !
+
+*******
+
+## 選擇虛擬機
+
+按照上面完成後，再回到我們的 cmder，可以看到因為成功登入，會讓你挑選專案：
+
+![](./gcp/33.jpg)
+
+可以看到 [1] [2] [3] 都是我的專案，而最後一個 [4] 是創建新專案，代表我們也可以在這裡創建
+
+選好我們要的專案後：
+
+> Do you want to configure a default Compute Region and Zone? (Y/n)?
+
+這邊是問你要不要重新設定一下虛擬機的位置，雖然我們在最初創建的時候已經設定好。
+
+所以這邊按 y/n 都是可以的
+
+*******
+
+按了 y 之後 : 
+
+![](./gcp/34.jpg)
+
+這時候就設定完成了，這時候大家可以使用下列這個指令
+
+```
+gcloud config configurations list
+```
+
+和 ls 很像，就是看我們現下有哪些虛擬機器，可以看到
+
+![](./gcp/35.jpg)
+
+IS_ACTIVE 這個欄位底下為 True 者代表的就是我們現在指令所對應的機器，以此可以辨別指令是下給哪一個虛擬機
+
+註 : 你也可以用 gcloud compute instances list 這個指令列出所有虛擬機
+
+*******
+
+## 進入虛擬機
+
+最後，我們要讓自己進入到虛擬機之中
+
+首先用以下指令列出所有的虛擬機
+```
+ gcloud compute instances list
+```
+
+![](./gcp/36.jpg)
+
+這邊可以看到 NAME 為 Lidemy，之後我們需要搭配下列指令
+
+```
+gcloud compute ssh [VM Name]
+```
+由於我們是首次登入，輸入之後它會列出 SSH 的 public key 與 private keys，選擇 y 繼續
+
+![](./gcp/37.jpg)
+
+然後就會跳出小黑窗，就可以直接用這個小黑窗操作了！
+
+註 : 這邊為什麼是跳出小黑窗而不是直接在現下 cmder 視窗進入 VM，這邊還在找資料研究，畢竟跳出的小黑窗真的很醜....比瀏覽器的小黑窗還要醜個兩三倍，崩潰
+
+# 後記
+
+這篇文章的完成是在 2019/7/21，會想要寫這篇的原因是因為最近有一些公司分享文章，內容是嘗試把伺服器從 AWS 移到 GCP。
+
+雖然在這邊我是用 GCP，但也不代表我可以不用去學 AWS 的安裝方法，畢竟在未來，這可能會是公司高層決定的，而不是我自己能夠決定的。
+
+這就讓我想到之前 Ptt 有討論過，做前端開發用 masOS 比較好，還是 Windwos ?
+
+討論得挺熱烈的，但在最後有一位板友跳出來的一句話我蠻認同：
+
+> 身為一個好的工程師，不管給你哪種電腦或環境你都要能做開發
+
+不禁讓我想起，在鋼鐵人這部電影裡面，被困在山洞中的東尼史塔克什麼設備都沒有，但對於長年在富裕環境與優渥資源庇護下長大的他，還是能在最險惡的環境下開發出馬克一號
+
+所以秉持著這個目標，多學多會，不論喜好哪種虛擬機，在現代市場的潮流之中，多會一種工具，永遠是多一個優勢
+
+共勉之。
+
 
