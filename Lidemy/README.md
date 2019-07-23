@@ -2,7 +2,7 @@
 
 ## Week1 - Week5 : Git / Command Line / 基本 Javescript 與程式概念 / 基礎網路概論
 
-[Week1 - Week5 連結](./week1 - 5)
+[Week1 - Week5 連結](./week1-5)
 
 ## Week6 : HTML 與 基本 CSS
 
