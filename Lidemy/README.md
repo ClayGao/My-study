@@ -1,8 +1,12 @@
 這邊會是我在 Lidemy 所有的心得筆記和歷程，陸續增加中
 
-## Week1 - Week5 : Git / Command Line / 基本 Javescript 與程式概念 / 基礎網路概論
+## Week1 - Week4 : Git / Command Line / 基本 Javescript 與程式概念 / 基礎網路概論
 
-[Week1 - Week5 連結](./week1-5)
+[Week1 - Week4 連結](./week1-4)
+
+## Week5 : 第一次複習週
+
+[Week5 連結](./week5)
 
 ## Week6 : HTML 與 基本 CSS
 
