@@ -1,6 +1,6 @@
 ## 本週簡介
 
-    這週主要的內容是如何部署自己的網站，包括購買虛擬機與購買網域，另外補齊資料庫的相關知識 ( Trisaction、ACID、Lock、SP、Triggers 等 )
+這週主要的內容是如何部署自己的網站，包括購買虛擬機與購買網域，另外補齊資料庫的相關知識 ( Trisaction、ACID、Lock、SP、Triggers 等 )
 
 ## 內容
 
