@@ -493,3 +493,152 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
 
 ## php 物件導向
 
+# Week11
+
+這周加強了 php 的應用，在實作留言版的部分，對留言本身加了刪除與新增功能，方法是使用 GET 這個 Method，傳遞 id 值給 php 腳本作處理 ( handle updating or deleting )。另外就是製作分頁系統，這邊我採用了 SQL 語法 LIMIT 實作。
+
+至於後端概念上，這週教授了非常重要的密碼學應用 －　雜湊與加密。
+
+所謂雜湊，就是一個無密鑰且不可逆的轉換，並且是無限的輸入會轉換成有限的輸出。
+
+而加密則是一個擁有密鑰且可逆的轉換，是有限的輸入，會轉成無限的輸出。
+
+另外還有很重要的「加鹽」概念與方法，也就是替一個值加另一個隨機的值，搭配雜湊函數使用，可以加強安全性 ( 先加鹽後雜湊 )
+
+## php 中的雜湊函數 hash() 與 password_hash()
+
+- hash()
+
+    ```php
+    echo hash('sha256','mypassword');
+    ```
+
+    hash 有兩個參數，一個是我要使用哪種 Hash 演算法 ( 演算法介紹請參考這裡 )，後者是要被 Hash 的值。
+
+    而這邊其實還有第三個參數，是一個 Boolean，若為 Ture 則輸出二進位的資料，若為 False，則輸出小寫十六進位資料。
+
+- password_hash() 與 password_verify()
+
+    ```php
+    $passwordHash = password_hash('mypassword', PASSWORD_DEFAULT);
+    ```
+    password_hash() 這個函數會回傳一個先被「隨機加鹽」再 Hash 後的值，所以其實這個函數內建加鹽。第一個參數放要被 Hash 的值，第二個參數是要使用哪種 Hash 設定。PASSWORD_DEFAULT 則是使用預設的 Hash 法，但要注意既然是 php 預設，則不同版本的 php 預設也都會不同。
+
+    **要注意同樣的值在每一次的 password_hash() 的結果都會不同，所以需要 password_verify() 來作驗證**
+
+    ```php
+    $input = '123';
+
+    $passwordHash = password_hash($input, PASSWORD_DEFAULT);
+
+    $isVerify = verify_password($passwordHash,'123');
+    ```
+
+    verify_password 回傳一個 Boolean，從上圖很清楚知道，第一個參數放的是要比對的　Hash Value，第二個參數要放的是比對值。若比對成功回傳 Ture，否則為 False。
+
+    **補充 : 若要看 Hash Value 的資訊可以使用 password_get_info**
+
+    ```php
+    $passwordHash = password_hash($input, PASSWORD_DEFAULT);
+
+    var_dump(password_get_info($hash)); // 輸出一 Array
+    ```
+
+    參考資料 :
+    
+        - https://www.itread01.com/articles/1497980291.html
+        - https://ithelp.ithome.com.tw/articles/10193762
+
+-----
+
+## 更進一步的 Session 機制
+
+回顧 Week9 我們給予使用者 Cookie，讓使用者下次瀏覽網頁時自動帶上這個 Cookie 讓後端作驗證，但驗證的方法太糟糕，非常不安全，因為當時我們採用的是只要該 Cookie 內的 Value 不為空就能算是登入狀態，所以這一週我們要發送一組 Cookie 驗證碼給使用者，讓使用者帶上這份驗證碼讓後端進行驗證，若驗證成功，則為登入狀態。
+
+在老師的教學中，建議同學可以使用 uniqid() 這個函數生成一個唯一 ID，夾在 Cookie 內給使用者，並同時將這個唯一 ID 存入一個我們新創的資料表中。
+
+```php
+$uniqid = uniqid();
+setcookit("member_id", $uniqid, time()+3600*24);
+```
+然後使用者登入時帶上這個 Cookie Value 時，則將該值與我們資料表中該會員擁有的唯一 ID 作比對。
+
+但我當時會錯意，用了一個很奇怪的方法，但老師沒有指錯。我的作法為直接將使用者的 username 拿來作 password_hash()，而不是使用 uniqlo()，不過存入資料表與之後驗證的步驟是差不多的。
+
+-----
+
+## Week11 結論
+
+總歸而言，這週的結論就是當我們把用戶的密碼 hash 過並放入資料表之後，即使資料庫密碼被破解，駭客也無法知道使用者的密碼，至少在短時間內幾乎是不可能破解密碼，安全性增強許多。
+
+這邊也告訴開發者與一般使用者一個相當重要的觀念，就是**安全的網站是不會存明碼的**，這也是為什麼在大多數網站中，提供使用者找回忘記密碼的功能往往是將使用者導向**變更密碼**而非告訴你舊密碼，因為該網站並不會知道你的舊密碼為何。
+
+另外就是這週新增了對 Cookie 內的值作驗證，但是在這個機制之下，**若使用者的 Cookie Value 被盜走，還是可以被偽造使用者身分登入**。
+
+歸納一下，在 Week11，我們從後端發送 Cookie 給登入的使用者，然後在限定時間內使用者若再次瀏覽網站，會自動帶上該 Cookie，由後端驗證該 Cookie 的值，比對資料表，若比對成功，則驗證通過，使用者則為登入狀態。
+
+# Week12
+
+這一週整體都是在談論 **「資訊安全」**，課程重點放在資訊安全的三大攻擊類型，這邊逐個介紹
+
+## SQL Injection
+
+顧名思義是利用 SQL 語法的結構，使資料庫執行非預期性的判斷。
+
+通常我們會在前端輸入資料，並使後端接收，按照 Week9 的基礎 php 連接資料庫的內容，我們在後端的作法是這樣的：
+
+```php
+require_once('conn.php');
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$sql = "SELECT * FROM users_table WHERE username = '$username' AND password = '$password'";
+$result = $conn->query($sql);
+
+if ($result) {
+    $isLogin = ture;
+} else {
+    $isLogin = false;
+}
+
+$conn->close();
+```
+
+最常見的手法是我於 username 輸入 
+```sql
+'OR 1=1 --
+```
+
+這時候就可以看成是這樣
+```php
+require_once('conn.php');
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$sql = "SELECT * FROM users_table WHERE username = ''OR 1=1 -- AND password = '$password'";
+$result = $conn->query($sql);
+
+if ($result) {
+    $isLogin = ture;
+} else {
+    $isLogin = false;
+}
+
+$conn->close();
+```
+
+可以看到 SQL 語法被改為 username='' OR 1=1，也就是第一個判斷條件的內容被「'」關閉了，而另外一個條件 1=1 又永遠為 Ture，而「--」又會將後面的 AND password = '$password' 註解掉。
+
+所以在 query 執行時，相當於是在資料庫執行
+```php
+"SELECT * FROM users_table WHERE username = ''OR 1=1
+```
+所以會成功，所以會執行登入結果。
+
+從這邊可以了解，程式的執行方式為
+
+變數賦值 => 變數放入字串 => 賦予 $sql 字串值 => 執行 $sql 
+
+基於這一點，有一個方法可以預防它，那就是預處理器
