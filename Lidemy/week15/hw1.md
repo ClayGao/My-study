@@ -614,7 +614,7 @@ $conn->close();
 ```php
 require_once('conn.php');
 
-$username = $_POST['username'];
+$username = $_POST['username']; // 輸入為 'OR 1=1 --
 $password = $_POST['password'];
 
 $sql = "SELECT * FROM users_table WHERE username = ''OR 1=1 -- AND password = '$password'";
@@ -629,7 +629,7 @@ if ($result) {
 $conn->close();
 ```
 
-可以看到 SQL 語法被改為 username='' OR 1=1，也就是第一個判斷條件的內容被「'」關閉了，而另外一個條件 1=1 又永遠為 Ture，而「--」又會將後面的 AND password = '$password' 註解掉。
+可以看到 SQL 語法被改為 username='*' OR 1=1*，也就是第一個判斷條件的內容被「'」關閉了，而另外一個條件 1=1 又永遠為 Ture，而「--」又會將後面的 AND password = '$password' 註解掉。
 
 所以在 query 執行時，相當於是在資料庫執行
 ```php
@@ -641,4 +641,146 @@ $conn->close();
 
 變數賦值 => 變數放入字串 => 賦予 $sql 字串值 => 執行 $sql 
 
-基於這一點，有一個方法可以預防它，那就是預處理器
+基於這一點，有一個方法可以預防，那就是[**預處理器**](https://en.wikipedia.org/wiki/Prepared_statement?source=post_page---------------------------)
+
+預處理器提供了 Prepared statement，也就是說我可以先準備一個可以執行資料庫語句的模板，在要執行該 SQL 指令時，再將我要查詢或更新時的目標代入這個模板即可。
+
+概念上不難，畢竟 prepare 本來就是預先準備的意思，於是我們可以改寫成以下：
+
+```php
+require_once('conn.php');
+
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+$stmt = $conn->prepare("SELECT * FROM users_table WHERE username = ? AND password = ?");
+$stmt->bind_param("ss", $username, $password);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result) {
+    $isLogin = ture;
+} else {
+    $isLogin = false;
+}
+
+$conn->close();
+```
+
+如此做的話，即使輸入中含有「'」這樣的字符，在經過預處理器之後也不會模板中的語法融為一塊，就可以達成我們預期達到的效果。
+
+- mysql_real_escape_string()
+
+    我們懂了預處理器怎麼用，但卻不知道原理為何，這邊要先介紹一個落落長的函數，叫做　mysql_real_escape_string()
+
+    這個函數顧名思義是跳脫字元，會回傳轉義之後的字符，可以轉換的內容包括 「\」、「'」與「"」等等
+
+    將轉義後的字元儲存在變數中，納入 SQL 語句中執行，在某種程度上也能阻擋 SQL Injection，但當然不一定能百分之百
+
+    ```php
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    $username = mysql_real_escape_string($username);
+    $password = mysql_real_escape_string($password);
+    $sql = "SELECT * FROM users_table WHERE username='" . $username . "' AND password='" . $ppassword . "'";
+    $conn->query($sql)
+    ..
+    ..
+    // 以下略
+    ```
+
+    而在預處理器的使用上，`prapre` 設定模板並會在**綁定值**之後會直接對整個語句做 `mysql_real_escape_string()`，如此以避免 SQL Injection
+
+- 何時該使用預處理器 ?
+
+    先講結論 : 即使你可能還沒完全弄懂，但還是建議將**所有執行 SQL 語法的模式**都改為預處理器
+
+    為什麼 ? 因為實際上當然不只有 `'OR 1=1 --` 這樣的攻擊手段，在第十二週的作業檢討之中，老師有親自示範一些超乎想像的 SQL Injection，只要一處被攻破了，整個網站都會淪陷，與其考慮太多的 injections，不如直接換成預處理器在 php 中執行 SQL 語句。
+
+## XSS (Cross Site Scripting)
+
+XSS 在中文稱為**跨站式腳本攻擊**，大意就是使用者從前端插入 Javascript ( \<script\> )，當用戶瀏覽該網站時，嵌入在其中的 Javascript 便會被執行，達到攻擊目的。
+
+依據攻擊方式的不同，XSS 大致被分為三種類型 :
+
+
+- 反射型 XSS
+
+    這邊簡單講一下事件順序
+
+    1. 通常發生在攻擊者傳一個**惡意連結**給使用者
+    2. 當使用者點擊這個惡意連結時，發送 Request，將這個 XSS code 發送給後端
+    3. 後端處理過後返回 Response 給使用者
+    4. 瀏覽器解析這段帶有 XSS Code 的資料後觸發漏洞
+    5. 可能會導致用戶的 Cookie 遭到竊取，或者彈出惡意視窗等等。
+
+    反射型 XSS 屬於一次型的攻擊，相較於下方介紹的儲存型 XSS，危害相對要小，但仍不可不慎
+
+- 儲存型 XSS 
+
+    有點類似 SQL Injection 的概念，在內容框輸入\<script\>，瀏覽器在渲染數據的時候會一併把你剛剛輸入的\<script\> 轉化為程式的一部份，比如說在留言框輸入
+
+    ```php
+    <script>alert('attack!')</script> 
+    ```
+
+    瀏覽器渲染時就可能會看成這樣
+
+    ```php
+    <div class="messages_board">
+        <div class="message">
+            <script>alert('attack!')</script> // 剛剛輸入的內容
+        </div>
+    </div>
+    ```
+    
+    於是就會彈出直這樣的一個視窗，干擾使用者，除非後端資料庫刪除或更改這段留言，否則漏洞就會一直存在，所以儲存型 XSS 又被稱為**持久型 XSS**
+
+    但當然攻擊者會做許多比 `alert('attack!')` 更惡劣的事情。這類攻擊型態通常被拿來盜用使用者的 Cookie 與管理員權限
+
+- 預防 XSS
+
+    其實不管是反射型 XSS 還是儲存型 XSS，都有以下這個共通點 :
+
+    > XSS 的本質就是讓對方瀏覽器執行攻擊者植入的 Javascript
+
+    所以在後端的預防，就是想辦法把這些會被誤會為程式碼一部份的字元跳脫，這時候我們使用下列這個語法：
+
+    ```php
+    htmlspecialchars($htmlsanitize,ENT_QUOTES,'utf-8');
+    ```
+    - 第一個參數是代入任何你要處理的字串
+
+    - 第二個參數代表對引號的處理方法，共有三種：
+    
+        - ENT_COMPAT：為預設值，只轉換雙引號「＂」，不管單引號「'」
+        - ENT_QUOTES：雙引號「＂」與單引號「'」都要轉換。
+        - ENT_NOQUOTES：都不轉換，給它放水流。
+
+    - 第三個參數代表我要轉換的編碼，這邊是用萬國碼 UTF-8
+
+   -  第四個參數這邊沒有打上去，是可選的參數，預設是轉換所有的 HTML 標籤
+    
+    *在這週複習週額外找資料才知道，其實 htmlspecialchars() 本身已經是挺高級的跳脫字元函式，若要自己土炮一個則是使用遞迴來跳脫`<script` 這個標籤，甚至是逐個字元來跳脫。*
+
+- 第三種 XSS : DOM-Based XSS
+
+    第三種 XSS 類型叫做 DOM-Based XSS，與上述兩種類型的差異是此類 XSS 與後端無關，純粹是當使用 Javascript 操縱 DOM 元素時所產生的漏洞，比如說我設置一個 input 可以輸入內容給另一個 DOM 元素調用，就可以利用這個 input 輸入 XSS Code
+
+    但此類型 XSS 攻擊比較少見，現今危害性較高且較為常見的類型還是以前兩種攻擊為主。
+
+
+延伸閱讀 : 
+    - https://www.jianshu.com/p/a7255e6ff844
+    - https://www.zhihu.com/question/21289758
+
+
+
+
+
+
+
+
+
+
