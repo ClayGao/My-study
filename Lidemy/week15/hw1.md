@@ -8,9 +8,12 @@
 
 一個是觀念，一個是實作技巧，兩者缺一不可，而後者的重要性不言可喻，太重要了，可以說寫 code 才是根本
 
-不如這樣說，其實觀念要化為實作，都是要通過 coding。觀念講得太多，而沒寫太多 codo，跟光說不練似乎沒有兩樣
+不如這樣說，其實觀念要化為實作，都是要通過 coding。觀念講得太多，而沒寫太多 code，跟光說不練似乎沒有兩樣
 
 所以這是未來的複習周 ( 也只剩下一次 ) 我需要去調整的。
+
+
+-----
 
 # Week9
 
@@ -250,9 +253,9 @@
 
 基礎的 php 的程式邏輯概念在之前的 Week5 的複習周內容都有講到
 
-if / for / function 等概念幾乎都是一樣的，這也是各個程式語言差不多相同的部分，所以這邊就不多談論基礎語法。而 echo / print_r() 等等，另外結尾一定要加 ; 也不用多說，這邊想把重點放在之前一直很弱的 OOP
+if / for / function 等概念幾乎都是一樣的，這也是各個程式語言差不多相同的部分，所以這邊就不多談論基礎語法。而 echo / print_r() 等等，另外結尾一定要加 ; 
 
-啊，另外就是 -> 是使用該函式的屬性，這邊不要弄亂了
+另外就是 -> 是使用該函式的屬性，這邊不要弄亂了
 
 所以這邊需要特別提的反而是利用 php 連接資料庫時會用到的語法，這邊會開始介紹這週作業歸納出來的一些技能 :
 
@@ -273,14 +276,14 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     // 一切的起源就是 mysqli 這個 class
     // 內中的伺服器名稱 / 帳號 / 密碼 / 與資料庫名的排序是固定的
 
-    if ($conn->connect_error) { // connect_error 是內建的語法，表示連線失敗
-        die('連線失敗');
+    if ($conn->connect_error) { // connect_error 是內建的語法，表示連線Failed
+        die('連線Failed');
     } else {
-        echo '連線成功';
+        echo '連線Success';
     }
     ```
 
-    使用 require_once 引入 conn.php 如果成功就會持續執行，如果失敗就會停止所有連線，因為我們在 connect_error 的判斷式使用 die()，所以一旦連線失敗，後面的程序都不會執行，所以可以將它當作一道閘門。
+    使用 require_once 引入 conn.php 如果Success就會持續執行，如果Failed就會停止所有連線，因為我們在 connect_error 的判斷式使用 die()，所以一旦連線Failed，後面的程序都不會執行，所以可以將它當作一道閘門。
 
     ```php
     require_once('conn.php'); // 放在第一行
@@ -309,7 +312,7 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     ```
     延伸閱讀 : [fetch_assoc() 與 fetch_array()、 fetch_row() 的不同 By RicharLin.Tw](https://richarlin.tw/blog/php-mysql-fetch/)
 
-    $result 會根據 $sql 的內容而有所不同，比如說 $sql 是 INSERT INTO ... / DELETE ... / UPDATE ... 就僅會回傳成功 ( TRUE ) 或失敗 ( FALSE )，這邊應該很好理解，根據你對資料庫做的動作決定回傳值
+    $result 會根據 $sql 的內容而有所不同，比如說 $sql 是 INSERT INTO ... / DELETE ... / UPDATE ... 就僅會回傳Success ( TRUE ) 或Failed ( FALSE )，這邊應該很好理解，根據你對資料庫做的動作決定回傳值
 
     ```php
     require_once('./conn.php');
@@ -322,9 +325,9 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
         $sql = "INSERT INTO claygao_comments(title, content, nickname, id_number) VALUES('$title', '$content', '$nickName', '$id_number')"; // 變數以 '' 包起
         $result = $conn->query($sql); // 由於是 INSERT INTO，這邊的 result 將會是 TRUE / FALSE
         if ($result) {   
-            echo "<script>alert('發文成功 !');parent.location.href='./index.php';</script>";
+            echo "<script>alert('發文Success !');parent.location.href='./index.php';</script>";
         } else {
-            echo "<script>alert('發文失敗，請洽管理員 !');parent.location.href='./write.php';</script>";
+            echo "<script>alert('發文Failed，請洽管理員 !');parent.location.href='./write.php';</script>";
         }
         $result->free();
     }
@@ -332,7 +335,7 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     $conn->close();
     ```
 
-    至於 $sql 中的語法格式正不正確，老師提供一個很好的建議，就是直接將語法丟到 phpMyAdmin 的 SQL 執行看是否成功就好。
+    至於 $sql 中的語法格式正不正確，老師提供一個很好的建議，就是直接將語法丟到 phpMyAdmin 的 SQL 執行看是否Success就好。
 
 - 其餘 php 語法
 
@@ -407,11 +410,15 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     關閉資料庫連線是一個良好習慣，通常會放在腳本型頁尾 ( 雖然我的作業都沒有加QQ )
     釋放記憶體這邊就見仁見智了，不過我覺得這習慣應該也不錯就是了
 
+-----
+
 ## Cookie 與 Session 初探
 
 這邊經過四週作業的洗禮，總算比較明白 Cookie 與 Session 機制，所以這邊再重新闡述一次兩者。
 
 首先，初學者應該明白的是，網路上討論 Cookie 和 Session 時，都沒有特地去講他們當下討論的是「機制」還是 Cookie 或 Session 本身，這樣很容易造成對象混淆，所以我們先從機制來講。
+
+---
 
 - **Cookie 機制**與 **Cookie**
 
@@ -424,6 +431,8 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     基本上 Cookie 本身就是一個容器，裝載的內容無所限制，儘管 Cookie 的內容分為 Name 與 Value，但是由於兩者的內容都可以自行更改，所以 Cookie 本身並不適合存放一些高機密資料，以免被盜取或偽造。
     
     另外就是 Cookie 本身的大小也有所限制，是 1024 KB。
+
+---
 
 - **Session 機制**與 **Session**
 
@@ -448,11 +457,11 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
 
     在 Week9 的作業中，我們的作法是將這個「通行證」用 Cookie 機制來實現，只要每次連線都可以帶上可以驗證我們身分的 Cookie，那我就不必每次都要輸入帳號密碼登入了。
 
-    而由於「通行證」是大樓本身－也就是後端要發給我的，所以當我第一次登入成功的時候，後端若要發給我這張通行證 Cookie，需要使用以下語法：
+    而由於「通行證」是大樓本身－也就是後端要發給我的，所以當我第一次登入Success的時候，後端若要發給我這張通行證 Cookie，需要使用以下語法：
     
     ```php
     if ( verify === true ) {
-        echo "登入成功 ! ";
+        echo "登入Success ! ";
         setcookie("member_id", "001", time()+3600*24); //setcookit(name,value,有效時間)
     }
     ```
@@ -474,7 +483,7 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
 
     $_COOKIE["member_id"] 可讓後端接收名為 member_id 的 Cookie 的值，這邊可以看到我的驗證條件設定為「裡面有值」就能通過
 
-    這樣當然是非常非常非常非常不安全的，前面有提過，Cookie 是可以由使用者自己創造與修改的，所以我只要在瀏覽的時候自行創造一個名為 member_id 的 Cookie，然後在 Value 裡面打幾個字，我就可以登入成功了。
+    這樣當然是非常非常非常非常不安全的，前面有提過，Cookie 是可以由使用者自己創造與修改的，所以我只要在瀏覽的時候自行創造一個名為 member_id 的 Cookie，然後在 Value 裡面打幾個字，我就可以登入Success了。
 
     上述其實都已經實現了「第一點」與「第二點」，現在如果我們要斷開與此通行證的連結，要怎麼做呢？
 
@@ -491,7 +500,7 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
 
     這就是我們最初設計的 Session 機制，後面幾週都還會再升級，請繼續往下看下幾週心得。
 
-## php 物件導向
+---
 
 # Week11
 
@@ -505,6 +514,8 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
 
 另外還有很重要的「加鹽」概念與方法，也就是替一個值加另一個隨機的值，搭配雜湊函數使用，可以加強安全性 ( 先加鹽後雜湊 )
 
+---
+
 ## php 中的雜湊函數 hash() 與 password_hash()
 
 - hash()
@@ -516,6 +527,8 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     hash 有兩個參數，一個是我要使用哪種 Hash 演算法 ( 演算法介紹請參考這裡 )，後者是要被 Hash 的值。
 
     而這邊其實還有第三個參數，是一個 Boolean，若為 Ture 則輸出二進位的資料，若為 False，則輸出小寫十六進位資料。
+
+    ---
 
 - password_hash() 與 password_verify()
 
@@ -534,7 +547,7 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
     $isVerify = verify_password($passwordHash,'123');
     ```
 
-    verify_password 回傳一個 Boolean，從上圖很清楚知道，第一個參數放的是要比對的　Hash Value，第二個參數要放的是比對值。若比對成功回傳 Ture，否則為 False。
+    verify_password 回傳一個 Boolean，從上圖很清楚知道，第一個參數放的是要比對的　Hash Value，第二個參數要放的是比對值。若比對Success回傳 Ture，否則為 False。
 
     **補充 : 若要看 Hash Value 的資訊可以使用 password_get_info**
 
@@ -553,13 +566,16 @@ if / for / function 等概念幾乎都是一樣的，這也是各個程式語言
 
 ## 更進一步的 Session 機制
 
-回顧 Week9 我們給予使用者 Cookie，讓使用者下次瀏覽網頁時自動帶上這個 Cookie 讓後端作驗證，但驗證的方法太糟糕，非常不安全，因為當時我們採用的是只要該 Cookie 內的 Value 不為空就能算是登入狀態，所以這一週我們要發送一組 Cookie 驗證碼給使用者，讓使用者帶上這份驗證碼讓後端進行驗證，若驗證成功，則為登入狀態。
+回顧 Week9 我們給予使用者 Cookie，讓使用者下次瀏覽網頁時自動帶上這個 Cookie 讓後端作驗證，但驗證的方法太糟糕，非常不安全，因為當時我們採用的是只要該 Cookie 內的 Value 不為空就能算是登入狀態，所以這一週我們要發送一組 Cookie 驗證碼給使用者，讓使用者帶上這份驗證碼讓後端進行驗證，若驗證Success，則為登入狀態。
 
 在老師的教學中，建議同學可以使用 uniqid() 這個函數生成一個唯一 ID，夾在 Cookie 內給使用者，並同時將這個唯一 ID 存入一個我們新創的資料表中。
 
 ```php
-$uniqid = uniqid();
-setcookit("member_id", $uniqid, time()+3600*24);
+if ( verify === true ) {
+    echo "登入Success ! ";
+    $uniqid = uniqid();
+    setcookit("member_id", $uniqid, time()+3600*24);
+}
 ```
 然後使用者登入時帶上這個 Cookie Value 時，則將該值與我們資料表中該會員擁有的唯一 ID 作比對。
 
@@ -575,11 +591,15 @@ setcookit("member_id", $uniqid, time()+3600*24);
 
 另外就是這週新增了對 Cookie 內的值作驗證，但是在這個機制之下，**若使用者的 Cookie Value 被盜走，還是可以被偽造使用者身分登入**。
 
-歸納一下，在 Week11，我們從後端發送 Cookie 給登入的使用者，然後在限定時間內使用者若再次瀏覽網站，會自動帶上該 Cookie，由後端驗證該 Cookie 的值，比對資料表，若比對成功，則驗證通過，使用者則為登入狀態。
+歸納一下，在 Week11，我們從後端發送 Cookie 給登入的使用者，然後在限定時間內使用者若再次瀏覽網站，會自動帶上該 Cookie，由後端驗證該 Cookie 的值，比對資料表，若比對Success，則驗證通過，使用者則為登入狀態。
+
+---
 
 # Week12
 
 這一週整體都是在談論 **「資訊安全」**，課程重點放在資訊安全的三大攻擊類型，這邊逐個介紹
+
+---
 
 ## SQL Injection
 
@@ -635,7 +655,7 @@ $conn->close();
 ```php
 "SELECT * FROM users_table WHERE username = ''OR 1=1
 ```
-所以會成功，所以會執行登入結果。
+所以會Success，所以會執行登入結果。
 
 從這邊可以了解，程式的執行方式為
 
@@ -697,6 +717,8 @@ $conn->close();
     先講結論 : 即使你可能還沒完全弄懂，但還是建議將**所有執行 SQL 語法的模式**都改為預處理器
 
     為什麼 ? 因為實際上當然不只有 `'OR 1=1 --` 這樣的攻擊手段，在第十二週的作業檢討之中，老師有親自示範一些超乎想像的 SQL Injection，只要一處被攻破了，整個網站都會淪陷，與其考慮太多的 injections，不如直接換成預處理器在 php 中執行 SQL 語句。
+
+    ---
 
 ## XSS (Cross Site Scripting)
 
@@ -775,6 +797,7 @@ XSS 在中文稱為**跨站式腳本攻擊**，大意就是使用者從前端插
     - https://www.jianshu.com/p/a7255e6ff844
     - https://www.zhihu.com/question/21289758
 
+---
 
 ## CSRF 跨站請求偽造 ( Cross Site Request Forgery )
 
@@ -784,6 +807,8 @@ XSS 在中文稱為**跨站式腳本攻擊**，大意就是使用者從前端插
 
     目前比較風行的一種方法是使用 token，概念就是提供一種不會存取在使用者 Cookie 中的額外驗證方法，如手機簡訊驗證就是一例。既然這個驗證令牌不會存在 Cookie 中，攻擊者就無法偽造。
 
+---
+
 ## Week12 心得
 
 這一週的內容其實要說很多可以非常的多，因為整個資訊安全的學問太大了，如同 Week11 的 Hash 演算法與密碼學等概念，在太短的時間內要觸及所有學問可以說是非常非常困難的一件事情。
@@ -792,4 +817,322 @@ XSS 在中文稱為**跨站式腳本攻擊**，大意就是使用者從前端插
 
 所以我相信即使課程結束之後，本週提到的概念還會繼續影響我們，也就是說，即使未來步入職場，對這類資訊安全的概念都要特別敏銳，不可不慎。
 
+---
+
 # Week13
+
+這一週主要教授 jQuery 與 Boostrap，這兩套都是現下主流的套件與框架，所以這週再一次影響了我們在編寫前端的方式。
+
+搭配這一週的主題，也特地看了一些補充資料，這一週其實沒有太多可以講的概念，因為概念就是先前的 Html、CSS 與 Javascript
+
+所以這週的複習重點我放在 Promise 與一些 jQuery 與 Boostrap 的知識補充
+
+## Promise 
+
+這週很重要的概念，當然還是先看過[MDN](https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/Reference/Global_Objects/Promise)的介紹，Promise 是在 ES6 才被正式加入，這也意味著瀏覽器的支援性大大提升，除了 IE
+
+Promise 其實並不複雜，就是用來解決「非同步」函式的執行順序寫法，可以用比較直覺且簡潔的方式處理，所以其實 Promise 在概念上是一個既有功能上的解決方案，基本上是一個好用的工具。
+
+```javascript
+function asyncMain(){
+    return new Promise(function (resolve,reject) {
+        console.log('準備階段');
+        resolve("Success");　// 若成功則回傳 () 中的內容給 .then 內的 function 作為引數
+        reject("Failed"); // 若失敗則執行 () 中的內容給 .catch 內的 function 作為引數
+    });
+}
+asyncMain();
+```
+輸出
+```
+準備階段
+```
+
+- .then 與 .catch
+
+    上述 // 中的內容可以用下列例子來明白
+
+    ```javascript
+    function asyncMain(){
+        return new Promise(function (resolve,reject) {
+            console.log('準備階段');
+            resolve("Success");　// 若成功則回傳 () 中的內容給 .then 內的 function 作為引數
+            reject("Failed"); // 若失敗則執行 () 中的內容給 .catch 內的 function 作為引數
+        });
+    }
+    asyncMain().then(function (msg) {  // asyncMain() Success回傳"Success"，then 的參數 msg 為"Success"
+        console.log(msg); // 輸出"Success"
+    }).catch(function (msg) {
+        console.log(msg); 
+    });
+    ```
+    輸出
+    ```
+    準備階段
+    Success
+    ```
+
+- 鍊式用法
+
+    ```javascript
+    function asyncMain(msg){
+        return new Promise(function (resolve,reject) {
+            console.log(msg + ": 準備階段");
+            resolve(msg + ": Success");　
+            reject(msg + ": Failed"); 
+        });
+    }
+    asyncMain('Step1').then(function (msg) { 
+        console.log(msg);
+        return asyncMain('Step2')
+    }).then(function (msg) {  
+        console.log(msg);
+        return asyncMain('Step3')
+     }).then(function (msg){
+        console.log(msg)
+     })
+    ```
+    輸出
+    ```
+    Step1 : 準備階段
+    Step1 : Success
+    Step2 : 準備階段
+    Step2 : Success
+    Step3 : 準備階段
+    Step3 : 成功
+    ```
+   
+參考資料 : https://segmentfault.com/a/1190000015341145
+
+*註：上面的筆記都是複寫上面這篇參考資料的內容，所以其實只提供個人複習 Promise 結構用*
+
+在 jQuery 的部分，類似用法的部分可以在 `$.ajax` 看到
+
+```javascript
+function islogin() {
+  $.ajax({
+    type: 'GET',
+    url: './handling/verify.php',
+    // Response 的結果會被放在 resp 之中
+    success(resp) {
+      const status = JSON.parse(resp);
+      loginStatus = status.islogin;
+      currectUser = status.currect_user;
+    },
+  });
+}
+```
+---
+
+## jQuery
+
+[基礎內容](http://youmightnotneedjquery.com/#has_class)
+
+    提倡某些功能你不一定需要 jQuery 的網站，但由於在功能上比對 Vanilla Javascript 與 jQuery 的部分很清楚，所以適合初學者參考用
+
+[jQuery 基本指令大全](http://jsgears.com/thread-63-1-1.html?source=post_page---------------------------)
+
+    雖然是十年前的文，但對於基礎來說還是十分值得參考
+
+對於 jQuery 這邊我覺得就沒有什麼需要多做筆記的了，重點就是在寫 code 的時候累積經驗，相比之下我覺得 Promise 與 sync / async 的概念更為重要
+
+---
+
+## Bootstrap
+
+Bootstrap 本質就是一套框架，但最近研究一下才了解原來 Boostrap 裡面用了不少 !important，沒錯，就是在開發時使人深惡痛絕的 !important
+
+所以深深感覺在大量套用 Bootstrap 之前，必須要對 CSS 權重的概念十分清晰，然後去研究 Bootstrap 一下每一種類的 class 分別是影響到什麼部分
+
+比如說在第十三週的作業，光是引入 Bootstrap 就跑版了 ( 因為有跟套件的 class 有重複到 )，那其實很難想像未來如果在基礎不夠扎實的情況下使用 Bootstrap 而造成維護上的困難
+
+所以我就在思考，Bootstrap 到底好在哪 ?
+
+感覺其實大部分 ( 除了手風琴等較大型的套件以外 ) 自己應該都可以手刻出來，只是程式碼不一定乾淨
+
+照目前的學習速度看來，未來如果自己的手刻能力很強了，其實對 Bootstrap 的依賴性就降低了，很可能只剩下「快速」的這個優點而已
+
+那麼結論就是，手刻和 Bootstrap 都應該要學，要熟練，不能單一依賴一方，但要使用哪一種，可能就要看專案的需求與時限而定了。
+
+---
+
+## Session 機制最終站
+
+在 Week11 中，我們建立了一個資料庫機制存放通行證，然後藉由 Cookie 實現
+
+然而，其實 php 引擎有內建語法可以幫我們實現這個機制，所以其實我們不用建立資料庫，也可以存放通行證資料
+
+這個語法就是 `session_start()`，若要使用，必須放在網頁最上方，或者還沒有任何輸出之前
+
+```php
+if ( verify === true ) {
+    session_start(); // 啟動 Session
+    $_SESSION['member'] = true; // 註冊登入者為會員並且使其為 true
+    $_SESSION['id_number'] = $row['id_number']; // 註冊登入成功的會員帳號與暱稱
+    $_SESSION['nickname'] = $row['nickname'];
+    echo "<script>alert('登入成功 !');parent.location.href='../index.php';</script>";
+}
+```
+
+當 session_start() 被執行時，會正式啟動內建 Session 機制，並且自動發送一個名為 PHPSESSION 的 Cookie 給使用者
+
+這個名為 PHPSESSION 的 Cookie，其 Value 是一組隨機亂數產生的亂碼，這一點就與我們先前使用 uniqid() 的方法不謀而合
+
+*PHPSESSION 是該 Cookie 的預設名稱，可以於伺服器這邊更改*
+
+另外，我可以使用 $_SESSION 建立屬於這組 Session 的相關資料，如該使用者的帳號與暱稱等等，都可以自定義儲存在後端數據中
+
+那要如何驗證呢 ? 這邊同樣要先使用 `session_start()` 
+
+```php
+isLogin = false; // 先宣告是好習慣，避免全局變數汙染
+
+session_start();
+  if (isset($_SESSION['member']) && $_SESSION['member'] === true) {
+    isLogin = true;　// 成功登入狀態
+  } else {
+    isLogin = false; // 非登入狀態
+  }
+echo json_encode($arr);
+```
+
+那要如何登出呢 ?
+
+只要在後端這邊銷毀這個通行證即可，也就是銷毀這個 Session，下列兩種方法都可以
+
+```php
+// 刪除 Session 變量
+unset($_SESSION['member'])
+
+// 刪除整份的 Session
+session_destroy();
+```
+
+這邊就是銷毀通行證的方法，下次用戶再輸入帳密登入時再發新的給他就好
+
+另外就是 Session 也可以設置存在時間，這樣可以更完善通行機制，這邊就不多做說明了。
+
+---
+
+## Week13 心得
+
+我覺得這一週就是開啟你對 jQuery 和 Bootstrap 的認識，然後藉由作業讓你去使用這些工具並了解背後的道理 ( 以網格系統為例 )
+
+另外就是在閱讀課外資料後，才了解為什麼 Week13 的 hw1 與挑戰題是分別要你自製網格系統，並在你的留言板上套用你自製的網格
+
+因為其實在某種程度上，你自製的網格系統可能還比 Bootstrap 提供的好用，又或者說**更合適**
+
+另外就是 Promise 即使上面筆記重寫了一遍，目前也還沒有太多的實戰應用，雖然理解一週比一週還深，感覺真的除了作業，還要多花時間寫 Side Projects 了
+
+只是 Promise 的出現會逼迫著我去複習 sync / async，然後藉此又去 Google 了 call stack 與 queue，然後再回溯最基本的 Javascript 概念 : 全域環境與區域環境等....
+
+接下來談談作業
+
+Week13 作業是有史以來花我最多時間的作業，原因是因為太久沒有回前端，再者就是重構的確非常耗時，尤其是把整個由後端處理好交給瀏覽器的東西，改成由前端去撈後端回傳的資料 ( 這邊使用 JSON )。再者，雖然從 Vanilla JS 改為 jQuery 簡潔了不少程式碼，但概念上以及語法上的轉換都還在適應與學習，所以格外耗時。
+
+所以我覺得在整個課程之中 Week13 可以當作一個指標，我自己也有察覺，Week13 的交作業曲線絕對不會像前幾週一樣有相同的陡度。
+
+---
+
+# Week14
+
+這週就簡單寫寫，這邊先謝謝老師，也謝謝 Gandi 的贊助 ( 雖然我還沒申請贊助 XD )
+
+關於 Week14 心得我有另外開一個筆記空間，[這邊](https://github.com/ClayGao/My-study/tree/master/Lidemy/week14)可以直接連過去
+
+因為這週我把筆記都搬到 GitHub 了，覺得已經是上週寫過一次的東西，複習週就不贅述了 QQ ( 其實是懶得寫 )
+
+另外這週有稍微提到但我在 Week14 沒有完全完成的還有防火牆，這邊也是我在之後要去加強的。
+
+---
+
+# Week15 總結
+
+其實我這篇大部分都是在平日完成的，這週六日我進入了所謂怠惰期，所以產能並不高
+
+另外就是我覺得自己在外面使用筆電時的學習效率遠比在家使用桌電還高，所以就像老師說的，選對環境比在那邊ㄍㄧㄥ怎麼堅持更重要
+
+那我覺得自己目前比較弱的還是在資訊安全與 Promise 這一塊，就像開頭說的，以課程進行到目前來看，實作與 Code 寫得的確是少了一點
+
+那為什麼每次複習週都幾乎要把之前教的東西都寫一次，我覺得對我來說，這樣的做法可以**強迫我去釐清之前的概念與所學**
+
+比如說像 Week9 這個部分，把所有的 SQL 語法都在寫一次，除了可以幫助我全部再 review 一次以外呢，對於我之後查 SQL 也有不錯的助益
+
+雖然很花費時間，但我覺得挺實在的，因為寫下多少幾乎就等於複習多少，像我 Week14 只丟個連結在那邊其實就是擺明了我剛學完懶得複習 XD
+
+這邊對於課程還有一些感想，詳見如下
+
+---
+
+## 對於後端課程的感想
+
+其實之前在老師直播時，有個問題是第九週學得很崩潰，是我提的，但學到現在覺得 php 的語法也習慣了
+
+總歸一句就還是練習的多寡而已，像現在我就覺得 jQuery 比 php 還累，所以完全就是學習曲線的問題
+
+後端課程其實老師講解得很清楚也很多了，我也很高興自己可以還能學會這麼多關於後端的知識，而且這樣可以自己獨立完善一個 Side Project 覺得很棒
+
+而課程的走向也在第十四週部署網站時達到新的里程碑，可以說是有始有終
+
+自己給予的評價是很高的，課程的內容會引領你知道 Google 的關鍵字該從哪裏下手，所以學習路線上沒有什麼問題
+
+---
+
+## 為什麼複習週心得要特地講 Cookie 和 Session ?
+
+因為我就是搞混的那一個，因為我把 Session 機制和 php 內建的 Session 相關語法搞混了
+
+所以一直反反覆覆相當混亂，傻到不知道老師是要引領我們一步一步建立並改進後端 Session 機制，直到最後進化成使用 php Session
+
+我可以明白老師這麼做的原因，就如同我在前幾周的作業簡答題有寫到 Session 在業界也是循序漸進的
+
+而這樣循序漸進的過程，也可以更好地讓學生們明白我們為何需要 Session，以及背後運作的原理
+
+於是這週心得我特地又寫了這一部份，加深自己的基礎概念
+
+---
+
+## 與前幾週的不同
+
+「自學」本來就是程式導師實驗計畫中很重要的一部分，老師提供的是一個~~老司機~~引路人角色，
+
+而在這四週我可以很明顯的感受到我們需要額外找資料的部分越來越多，其實真的不錯
+
+因為這一部分也是訓練自己 Google 與整理資訊的能力，而且如果真的找不到，也可以跟老師提問，老師也會幫忙解答
+
+實在不可能說 jQuery 從頭教一遍，這很沒意義，因為 Javascript 基礎已經打好七八成了，程式概念重的是一理通，百理明
+
+所以我覺得課程編排在這邊是不錯的，在課程漸漸邁入尾聲的情況下，慢慢讓各個學生獨立出來
+
+比如說有些認真的同學在第九週就在搞 OOP 了，我比較不上進，所以還沒開始搞
+
+從這一點看來，如何耕耘，如何收穫的部分在學習成果就呈現得非常顯著
+
+不過反著來說，每個學生的學習效果落差可能就比較大，很難說大家都保持在差不多的水平
+
+所以我就在想，「作業」應該就是個篩選器，只要能過篩，基本上就是把學生的實力拉到一個老師希望的水準
+
+至於還沒辦法過篩的同學，相對而言就要將這些成本付諸在時間上面，這也可以解釋為何有些同學在某幾週卡了，他們也正在努力拉升實力
+
+總而言之，也許十月中也不會算是真正的結束，而是另一個開始。
+
+---
+
+## 其他想法
+
+程式導師實驗計畫帶給我最大的改變其實很明顯，那就是 Soft_Job 板內文可以看得懂了
+
+另外我個人加的一些程式語言討論群組，也可以漸漸看得懂他們在講什麼
+
+但我始終相信自己離轉職還有一段距離，我會持續地追下去 ( 醫科真的狂QQ )
+
+那另外關於老師的前端~~老司機~~引路人計畫，其實我內心是很想參加的，只是我並不要求自己能趕上第一批 ( 當然以目前實力也不太可能啦 )
+
+因為我覺得第一批有第一批的好，而後進的人也有後進的好處，不必操之過急，穩紮穩打比較重要
+
+大概就是這樣了，有後續想問的問題會在 PR 上面提問
+
+
+
+
+
