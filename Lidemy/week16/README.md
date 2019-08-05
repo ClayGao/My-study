@@ -8,7 +8,7 @@
 
 - [程式導師實驗計畫：Lesson 9-3 之作業檢討](./T1-9-3.md)
 
-    內容尚在建置中
+    這篇主要針對 cache 來作討論，探討[這篇文章](https://blog.techbridge.cc/2017/06/17/cache-introduction/)中的主題
 
 - [程式導師實驗計畫第二期：Week9-1 基礎到中階](..week14/T2-9-1.md)'
 
