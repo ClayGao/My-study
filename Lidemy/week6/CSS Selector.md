@@ -606,7 +606,7 @@
 
         --------
 
-    Pseudo-element 偽元素，不是 classes 哦
+    - Pseudo-element 偽元素，不是 classes 哦
 
         - before
 

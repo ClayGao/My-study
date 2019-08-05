@@ -10,7 +10,7 @@
 
     這篇主要針對 cache 來作討論，探討[這篇文章](https://blog.techbridge.cc/2017/06/17/cache-introduction/)中的主題
 
-- [程式導師實驗計畫第二期：Week9-1 基礎到中階](..week14/T2-9-1.md)'
+- [程式導師實驗計畫第二期：Week9-1 基礎到中階](..week14/T2-9-1.md)
 
     與這一週有關的部分討論到 cache，內有 cache 基本介紹
 
