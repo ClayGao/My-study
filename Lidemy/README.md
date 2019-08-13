@@ -48,4 +48,14 @@
 
 [Week15 連結](./week15)
 
-## Week16
+## Week16 : CSS 預處理器 Sass / Scss，cache 機制介紹，資料結構 Stack 與 Queue
+
+[Week16 連結](./week16)
+
+## Week17 : Hoisting、Closure 與 Scope 底層原理，JavaScript 物件導向與 this 指向 - 用 Execution Context 解析
+
+[Week17 連結](./week17)
+
+## Week18 : Gulp 與 Webpack 初探，我們為何需要它？與 CSS 優化小技巧
+
+[Week18 連結](./week18)
