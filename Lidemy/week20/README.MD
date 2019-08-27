@@ -63,7 +63,7 @@ module.exports = {
         }
       },
       {
-        test: /\.s[ac]ss$/i, // 一種 regex (正規表達式)，用來比對檔名
+        test: /\.s[ac]ss$/i, // 一種 regex (正規表達式)，用來比對檔名，也可寫 /\.(scss|sass)$/
         use: [
           // Creates `style` nodes from JS strings
           'style-loader',
@@ -71,7 +71,8 @@ module.exports = {
           'css-loader',
           // Compiles Sass to CSS
           'sass-loader',
-        ],  // 總結，只要是 sass/scss 的副檔名，都要經過　use: [ ] 內的 loader 處理，處理順序是由最尾至前頭
+        ],  
+        // 總結，只要是 sass/scss 的副檔名，都要經過　use: [ ] 內的 loader 處理，處理順序是由最尾至前頭
       },
     ],
   },
@@ -97,3 +98,38 @@ module.exports = {
 };
 ```
 https://ithelp.ithome.com.tw/articles/10194056
+
+## loader 與　plugins 的差別 ?
+
+兩者的差別在於，loader 用於轉化檔案，使 webpack 打包過程中添加原本不附帶的能力 (講是這樣講，但其實一些 loader - 如 babel 的編譯與 mibify-JS 的壓縮都內建在 webpack 之中了)，一個 loader 檔案格式為 xxx-loader.js，所以也可以自己寫來測試看看。
+
+另外，loader 的執行順序是由下至上
+
+而 plugins 則是就「Webpack 本身就有的能力」做強化，比如說引入是 webpack 本身的功能，我們可以利用 plugins 的設定提供引入 jQuery 等套件的能力
+
+若更進一步從工作機制來看，loader 本身就是將一個檔案「編譯」成另一個檔案，
+
+而 plugins 則是一個擴展工具，他處理的時點是「loader 結束後」，根據 webpack 在正常打包的過程中執行所屬任務。也就是說，就算沒有設定 plugins，webpack 也是這樣打包，設定了，也是這樣打包，只是多做一點事
+
+https://blog.csdn.net/qq_34629352/article/details/83628917
+
+https://blog.csdn.net/keliyxyz/article/details/51579078
+
+## test 的寫法
+
+陣列名稱用 use 或 loader 似乎都可以，以下用 loader 舉例
+
+第一種 :
+
+```javascript
+  test: /\.css$/,
+  loader: "style!css!sass"
+```
+
+第二種比較推薦，好讀：
+
+```javascript
+  test: /\.css$/,
+  loader: ["style" , "css" , "sass"]
+```
+
