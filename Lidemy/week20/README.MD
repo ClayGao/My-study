@@ -463,7 +463,7 @@ https://segmentfault.com/a/1190000005614604
 
         宣告函數時產生，[[Scope]] 會是宣告函式的範疇 EC 的 VO，嘗試使用底層運作機制解釋閉包時，必要牢記此定義
 
-# JavaScript 中的物件導向
+# 複習　JavaScript 中的物件導向
 
 要談 JavaScript 的物件導向，就先來看在 ES5 中是如何用 function 來實現的
 
@@ -688,19 +688,187 @@ function Dog2(name) {
 
 ## 總結
 
-所以其實 `new` 就是做了以下四件事情
+  所以其實 `new` 就是做了以下四件事情
 
-1. 先宣告一個空物件
-2. Call 建構子
-3. 綁 prototype
-4. 回傳該物件
+  1. 先宣告一個空物件
+  2. Call 類別建構子
+  3. 綁類別的 prototype
+  4. 回傳該物件
 
-大概就是這樣，言語不一定好懂，請從 Code 來解析
+  大概就是這樣，言語不一定好懂，請從 Code 來解析
+
+# prototype 原形鍊
+
+## 前言
+
+在談原形鍊之前，先來講講最近回去看魔戒三部曲的故事
+
+中土世界中一直都有邪惡蜘蛛的存在，其中較為著名的，就是魔戒三部曲中的**屍羅 (Shelob)**
+
+而從哈比人前傳中你也可以看到，屍羅本身也有不少後裔，遍布在迷霧山脈以東的**幽暗密林**
 
 
+## 函數與 prototype - 蜘蛛與絲線
+
+故事先到這邊
+
+現在來談談 JavaScript 中的物件導向，讓我們看看在幽暗密林發生了什麼事
+
+```javascript
+function Shelob(name) { // 屍羅 Shelob
+    this.name = name
+}
+
+Shelob.prototype.getName = function() {
+    return this.name
+}
+
+Shelob.prototype.sayHello = function() {
+    console.log(this.name)
+}
+
+var spiderA = new Shelob('spiderA')
+spiderA.sayHello() // Clay
+var spiderB = new Shelob('spiderB')
+spiderB.sayHello() // Andy
+
+```
+
+屍羅在幽暗密林誕生了它的後裔，這些小蜘蛛如同她的影子，漸漸成長茁壯，如同她的複製體一般
+
+用 JavaScript 來比喻，每一個從 Shelob new 出來的 spider ，都會帶有一個 `__proto__`　的物件
+
+`__proto__` 這個語法包含著左右兩條底線，如同命運的絲線一般緊緊綑綁著她們的母親
+
+所以不論是哪一隻小蜘蛛的 `__proto__`，其屬性都維繫著同一個 prototype，也就是 `Shelob.prototype`
+
+屍羅的後裔們利用 `__proto__` 繼承了屍羅的力量 (`Shelob.prototype`)
+
+只要是 Shelob.prototype 內建立的屬性方法，她的子孫們都可以使用
+
+回到程式碼上理解，原來，**每一個函數都有 prototype**，你可以想像它是函數的絲囊，透過它，可以讓每一個以它為主體 new 出來的物件都能使用它的方法，這些絲線散布到它的 instances 身上則是  `__proto__`，`__proto__`　就像是函數的 prototype 延伸出來的絲線之末，維繫著彼此的關係與母子的命運
+
+## 屍羅背後的傳說 - 昂哥利安
+
+在「精靈寶鑽」敘述道，曾有一隻邪惡的大蜘蛛名為**昂哥利安** (Ungoliant)，在故事中，她曾協助天魔王米爾寇在世界上做亂，漸漸變成了一個比米爾寇還要強大的存在。但在最終，她屈服於自己的飢渴，把自己給吞食掉了。
+
+而屍羅正是昂哥利安的後代，然而，千百年的史實已不可考，昂哥利安的傳說也僅僅流於傳唱之中
+
+現在，回到程式碼
+
+我們知道 spiderA 與 spiderB 的 `__proto__` 繼承並維繫著 Shelob.prototype，因此
+
+```javascript
+console.log(spiderA.__proto__ === Shelob.prototype) // true
+```
+
+從這一點我們可以得知，兩者的確有血緣關係
+
+那在 Shelob.prototype 更古早前呢 ?
+
+原來 Shelob 的可怕力量源自於她的祖先- 位於遠古第一紀元的「昂哥利安」，昂哥利安是中土大陸所有蜘蛛的原型，而屍羅也是她的子女之一，所以在她的能力之中，可以看到昂哥利安的影子。我們可以用下列程式碼表達看看
+
+```javascript
+console.log(Shelob.prototype.__proto__ === Object.prototype) // true
+```
+
+Shelob.prototype.__proto__ 繼承了 object 的原型，也就是 object.prototype
+
+那　object.prototype　的 __proto__ 呢 ?
+
+```javascript
+console.log(Object.prototype.__proto__) // null
+```
+
+答案是 `null`
+
+就如同 wiki 百科記載關於[昂哥利安起源的敘述](https://zh.wikipedia.org/wiki/%E6%98%82%E5%93%A5%E7%AB%8B%E5%AE%89) :
+
+> 昂哥立安的起源不明，托爾金從未精確地描述她的出現，只是略說她在世界出現前已存在。她可能是埃努（Ainur）之一，在埃努的大樂章時被魔苟斯（Morgorth）所墮落，抑或是虛空和黑暗的化身。昂哥立安與湯姆·龐巴迪（Tom Bombadil）及貝露庭爾王后（Queen Berúthiel）的貓一樣，托爾金都從未在故事中提供關於他們的精晰背景。
+
+## 好了，唬爛完畢
+
+其實用上述的例子僅僅想表達出幾個重點：
+
+1. `__proto__` 繼承函式的 `prototype`
+2. `spiderA.__proto__.__proto__ === Object.prototype` 為 `true`
+3. `Object.prototype.__proto__ === null` 為 `true`，因為已經是原形鏈的最頂端
+
+這邊我們來探討幾個點：
+
+## 為什麼 Shelob.__proto__ 是 function，而 Shelob.prototype.__proto__ 是 object.prototype ?
+
+先來看一下這段程式碼 :
+
+```javascript
+function Shelob(name) { // 屍羅 Shelob
+    this.name = name
+}
+
+console.log(Shelob.__proto__) // [Function]
+
+console.log(Shelob.prototype) // Shelob {}
+
+console.log(Shelob.prototype.__proto__) // {}
+```
+
+概念上，我們可以把 `__proto__` 的意義解釋為「來自於何種原形」
+
+`Shelob` 本質上是一個 `function`，所以 `Shelob.__proto__` 就是她所來自的原形為 `function`
+
+可能會搞混的是，把 `Shelob.prototype` 當作 「Shelob 的原型」，而進一步理解成 `Shelob.prototype` 是一個 `function`
+
+這是錯誤的想法
+
+實際的狀況是：
+
+當一個函式被宣告時，本身都會帶有一個叫做 `prototype` 的**空物件**，在一般的呼叫使用下，是不會使用到這個 `prototype` 的，**除非，你將這個函式做為構造函式，用它來 new 出 intances**，prototype 才會派上用場
+
+*~~這種感覺就像如果一個母體如果不生小孩，子宮本身是沒有用處的？？~~*
+
+一但 new 了 intances，這些被 new 出來的子孫就會帶有 `__proto__`，`__proto__` 會繼承母體 `prototype` 的所有內容
+
+```javascript
+function Shelob(name) { 
+    this.name = name
+}
+
+Shelob.prototype.biteElf = function() { // Shelob 有了咬精靈的能力
+    console.log("I killed Elf")
+}
+
+var spiderA = new Shelob('spiderA') // Shelob 的孩子也繼承了
+spiderA.biteElf
+
+```
+
+剛剛提到，既然函式的 `prototype` 是物件，那麼 `console.log(typeof Shelob.prototype)` 自然也是 `object` 了，而如果你 log 內容，則會顯示`Shelob Name { }`
+
+最後，`console.log(Shelob.prototype.__proto__)` 其實意思就是找 log 出 `Shelob.prototype` 這個物件的原型，既然它是物件，那麼物件的原型當然是來自於最初始的 `Object.prototype`，在 `Object.prototype` 內的所有方法，都可以被所有的物件存取，可以想像是宇宙級別的生物，就像是中土世界中的所有蜘蛛都是源自於昂哥利安一樣
+
+既然如此，`Object.prototype` 的內容只要一有更改，或者是在裡面加入新的方法，所有的 `Object` 都有可能被影響到，所以在開發上，不建議直接對 `Object.prototype` 動手腳
+
+而由於 `Object.prototype` 本身已經是 `Object` 中最高階的存在，再上去就沒有了，所以 `console.log(Object.prototype.__proto__)` 會是 `null`
 
 
+## 後記
+
+以上故事如果有對魔戒原作的冒犯或者有敘述不符合小說內容與關於 JavaScript 敘述錯誤的地方，在此致上十二萬分歉意！
+
+自己有時間會去補完「精靈寶鑽」的！
+
+事實上這樣的比喻也不是說百分百完美，因為 function 和該 function 的 prototype 屬性，其實要拆成兩個不同的東西來看，function 是 function，function 的 prototype 是 object，這是我一開始聽老師上課搞混的地方。
+
+其實 Week17 沒有特別留意，在複習的時候看到這句：
+
+![](./img/6.jpg)
+
+因為實在不懂為什麼 `Person.prototype` 是直接由 `Object` 生成的，又去查了資料
+
+找到[這篇](https://pjchender.blogspot.com/2016/06/javascriptfunction-constructorprototype.html)很不錯，也放在參考資料上了
+
+至於方法會沿著原型鏈繼續往上找的概念已經理解，所以這邊就沒有寫在複習中了
 
 
-
-
+- https://github.com/creeperyang/blog/issues/9
+- https://pjchender.blogspot.com/2016/06/javascriptfunction-constructorprototype.html
