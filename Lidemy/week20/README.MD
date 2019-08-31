@@ -101,15 +101,15 @@ https://ithelp.ithome.com.tw/articles/10194056
 
 ## loader 與　plugins 的差別 ?
 
-兩者的差別在於，loader 用於轉化檔案，使 webpack 打包過程中添加原本不附帶的能力 (講是這樣講，但其實一些 loader - 如 babel 的編譯與 mibify-JS 的壓縮都內建在 webpack 4.0 之中了)，一個 loader 檔案格式為 xxx-loader.js，所以也可以自己寫來測試看看。
+兩者的差別在於，loader 用於轉化檔案，使 webpack 打包過程中添加原本不附帶的能力 (講是這樣講，但其實一些 loader 的功能- 如 babel 的編譯與 mibify-JS 的壓縮都內建在 webpack 4.0 之中了)
 
 另外，loader 的執行順序是**由下至上** (由右至左)
 
-而就時點來講，loader 是在 webpack 執行編譯時一併執行
+而就**時點**來講，loader 是在 webpack 執行編譯時一併執行
 
-而 plugin 則是在 webpack 編譯前或編譯後執行
+而 plugin 則是在 webpack **編譯前**或**編譯後**執行
 
-若從對象而言，loader 針對的是 test 包含的檔案
+若從對象而言，loader 針對的是 test 指定的檔案
 
 而 plugins 是針對「整個 webpack 架構」做監聽，若有符合的狀況則執行該操作
 
@@ -278,12 +278,424 @@ url-loader works like `file-loader`, but can return a DataURL if the file is sma
 
 # Plugin 
 
+不同的 Plugin 插件會有不同的配置方法，所以我們直接挑 [Babel 外掛](https://webpack.docschina.org/plugins/babel-minify-webpack-plugin)來談
+
+```javascript
+// webpack.config.js
+const MinifyPlugin = require("babel-minify-webpack-plugin"); // 引入 plugin
+module.exports = {
+  entry: //...,
+  output: //...,
+  plugins: [
+    new MinifyPlugin(minifyOpts, pluginOpts) // new 一波
+  ]
+}
+```
+
+可以看到基本用法，基本上就是
+
+- 安裝 plugin (視套件而定)
+- 於 webpack.config.js 引入 plugin
+- 於 webpack.config.js 的 plugins: [ ] 之中 new 一個實例，可以帶入參數
+
+如果你點入上述的連結看，也可以看到為何我們明明已經有 babel-loader，卻還要使用 Babel plugin
+
+> - webpack loader 对单个文件进行操作，并且 minify preset 作为一个 webpack loader将会把每个文件视为在浏览器全局范围内直接执行（默认情况下），并且不会优化顶级作用域内的某些内容。要在文件的顶级作用域内进行优化，请在 minifyOptions 中设置 mangle: { topLevel: true }。
+
+這個說法也印證了我們稍早的時候說明 Loader 只對單個文件做操作。
+
+關於 Plugins 的基本操作都差不多，但好處是這些外掛的開發者都會詳細寫出如何使用，比如說這個 [Speed-Measure-Plugin
+](https://github.com/stephencookdev/speed-measure-webpack-plugin)，它的使用方法就和 Babel plugin 不太一樣，因為處理流程和功能的不同的差異，每個套件都不同
+
+所以其實重點在於你看不看得懂該 Plugin 的文件而已
+
 https://blog.csdn.net/weixin_38516688/article/details/86537567
 
+[官方文件關於 Plugin](https://webpack.docschina.org/plugins)
+[TYSON 大大關於 Webpack 鐵人賽文章](https://ithelp.ithome.com.tw/articles/10201485)
 
-# 進階 webpack-dev server 相關
+# 初探 webpack-dev server 
 
+在**開發**的過程中，webpack --watch 指令可以讓我們在編輯引入檔案 / webpack.config.js 之後，直接重整瀏覽器就可以看到變化後的結果，但若我們連重新整理都不想按，只要修改檔案就可以即時更新瀏覽器的頁面，能做得到嗎？
+
+可以，這個東西就叫 webpack-dev-server，是一個 node.js Express server，可以想像是利用監聽器監聽開發檔案是否有被修改，若有，就自動將瀏覽器重整
+
+安裝：
+
+```
+npm install webpack-dev-server -D
+```
+
+安裝完之後，我們要來講一下 webpack-dev-server 的執行原理
+
+在原本的 webpack --watch 的方法中，我們是直接開啟 html 檔案，而 html 檔案裡面是一行 `<script src="./dist/index.bundle.js></script>`
+
+但是 webpack-dev-server 的運作卻不是這樣，我們並不是直接開啟 html 檔案，而是使用以下網址：
+
+```
+localhost:8080/webpack-dev-server
+```
+
+而這個該網址 html 所引入的 .js 位置，並不是你實體資料夾的 `/dist/index.bundle.js`，而是  webpack-dev-server 自動編譯 `index.js`，並於編譯完成之後，複製一份到記憶體之中，讓 webpack-dev-server 的 html 引用
+
+也就是說，webpack 與 webpack-dev-server 是兩個不同的分支
+
+```
+一般流程 :
+index.js 被修改 => 執行 webpack => index.bundle.js => index.html 使用
+
+使用 webpack-dev-server
+index.js 被修改 => 重新編譯 index.js => 複製一份到記憶體 => webpack-dev-server 使用
+```
+
+其實不用想得太複雜，你就想像執行 webpack 與執行 webpack-dev-server 是兩件毫不相干的事情
+
+只是執行 webpack-dev-server 會 clone 一份一模一樣的資料夾在記憶體裡面，先簡稱原本的專案資料夾為「原資料夾」，執行 webpack-dev-server　的是「副資料夾」
+
+*簡稱有點怪怪的，請見諒*
+
+所以實際產品上線，你還是要執行 webpack，讓原資料夾的 index.bundle.js 產出
+
+正因為原資料夾與副資料夾兩者是不同的，所以 html 不是去讀原資料夾 /dist 內的檔案。那我們怎樣讓 html 與去讀副資料夾內的 js 呢 ?
+
+如果說原資料夾有關於自己的 webpack setting，那麼副資料夾也有，現在來編寫關於 webpack-dev-server 的設定檔
+
+打開原資料夾的 webpack.config.js，在 module.exports 底下加入 devServer 設定檔
+
+```javascript
+module.exports = {
+  // dev-server 的設定
+  devServer: {
+    contentBase: path.join(__dirname, '/'),   // 1. dev-server 的根目錄位置，關係到 html 的引入
+    compress: true,                           // 2. 是否壓縮 (gzip)
+    port: 8080,                               // 3. port 位置
+    inline: true                              // 4. 即 inline-mode，另外還有 iframe-mode
+  },
+  entry: {
+    app: ["./src/index.js"],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'index.bundle.js',
+    publicPath: 'dist',             // 5. 讓 webpack-dev-server 去讀這個 path
+  },
+```
+
+關於 1 點特別說明，其實就是 webpack-dev-server 的開始執行之後，副資料夾預設的位置，假設此路徑設定是 /test，那你的 index.html 就要放在 test ，`localhost:8080/webpack-dev-server` 才讀得到
+
+而第 5 點是什麼意思呢 ? 前面有說過 webpack-dev-server 並不是真去拿原資料夾 ./dist 的 index.bundle.js，所以這邊回到稍早的問題，要讓副資料夾與底下的 html 與 index.bundle.js 掛勾在一起，就需要在 publicPath 做目錄設定
+
+**publishPath 所設定的路徑可以給 webpack-dev-server 的 index.html 做引入參考**，所以原本 index.html 的 `<script src="./dist/index.bundle.js></script>` 並不需要修改，pathicPath 的路徑概念，你可以想像是在**div-server 執行後， 輸出至記憶體中副資料夾內的 dist 資料夾**
+
+但是你必須重新提醒自己的是，執行 webpack-dev-server 並非真的打包，所以你原資料夾上的 /dist 底下還是不會有任何變動，這也是先前說過最後你仍需要執行 webpack 打包的原因，因為其不像 webpack --watch 是真的打包
+
+最後，我們就可以執行 webpack-dev-server :
+
+```
+webpack-dev-server
+```
+
+記得設定至 package.json 的 script 中，省點時間打字囉！
+
+下列參考網址還有更多關於 webpack-dev-server 的開發方法，可以參考
+
+https://skychang.github.io/2015/08/27/Webpack-dev_server/
 https://segmentfault.com/a/1190000005614604
+
+
+# JavaScript 底層複習
+
+# 前言
+
+在 Week17 的 JavaScript 的底層運作中，我們用 Execution Context 解釋了幾乎所有在 JS 中的現象，如提升、閉包與原型鍊等。
+
+關於 Hoisting，由於 EC 的運作方式幾乎已經很好地解釋了提升的發生，另外要多記住函式提升優先權與 TDZ，所以就不重複贅述了
+
+這邊再更進一步，用自己習慣且更容易定義的判斷方法來看看閉包 (Closure)、`this` 與原型鍊
+
+# Closure
+
+- JavaScript 使用靜態作用域
+
+    這是一個重要的概念，在 JavaScript 裡，該函式內的作用域及內中存取的變數判定都是由「該函式宣告的位置」去決定，也就是靜態作用域。
+
+    反之則是動態作用域，非常接近 JavaScript 中 `this` 的概念
+
+- 閉包的條件
+
+    以我目前的觀察來看，經典例子就是：
+
+    > 在一個函式中宣告並 `return` 該函式，且該函式存取非自己範疇的值，那麼該函式的作用域就會是一個閉包，保留值
+
+    而需要這麼做的經典原因則是：
+
+    > 我需要一個變數供全域存取，但我又不希望它是個全域變數
+
+    所以閉包的定義就是：
+
+    > 一個函式，可以把存取的值關在裡面保存現狀
+
+- 更進一步來說 :
+
+    在**[所有的函式都是閉包](https://github.com/aszx87410/blog/issues/35)**一文中表示，理論上 JavaScript 內的所有函式都是閉包，因為每一個函式在宣告時，都會產生該函式的 [[Scope]]
+
+    而若就實務上定義則是：
+
+    > 有用到「自由變數」，且離開被宣告的範疇仍被繼續使用的函式，就是閉包
+
+    - 自由變數 :
+
+        在函式中所存取，不為該函式中宣告且非該函式參數的變數，稱自由變數，如下列 `test` 中的 `a`
+
+        ```javascript
+        a = 10
+        function test(){
+            console.log(a)
+        }
+
+        test()
+        ```
+    而「離開被宣告的範疇仍被繼續使用的函式」，return 該函式給一個全域變數就是一個很好的例子
+
+    比如說經典案例 `for(var i = 0..`，就是因為在迴圈中宣告了函式，且該函式存取了自由變數 `i`，並且在回呼時執行，因此存取了當時 `i` 的值
+
+    - [[Scope]]
+
+        宣告函數時產生，[[Scope]] 會是宣告函式的範疇 EC 的 VO，嘗試使用底層運作機制解釋閉包時，必要牢記此定義
+
+# JavaScript 中的物件導向
+
+要談 JavaScript 的物件導向，就先來看在 ES5 中是如何用 function 來實現的
+
+事實上在 ES5 中，我們是宣告一個函式，並且在該函式中回傳一個物件，物件內放函式
+
+然後使用物件導向的宣告方法：
+
+```javascript
+function Dog(name) {
+    var Myname = name
+    return {
+        getName: function() {
+            return myName
+        },
+        sayHello: function() {
+            console.log(myName)
+        }
+    }
+}
+
+var d = Dog('Clay')
+d.sayHello() // Clay
+
+var e = Dog('Andy')
+e.sayHello() // Andy
+```
+
+你可以理解為什麼是 d.sayHello，因為 `obj.name` 這個格式是我們一般去使用物件內屬性的用法，既然這個屬性是函式，那當然是 `obj.name()` 囉！
+
+這樣的寫法當然不是最好的，因為 d 與 e 中的函式並不是在同一個記憶體位置，所以這樣會比較吃效能
+
+於是有了 `new`
+
+- `new` 
+
+先來看看下列程式碼
+
+```javascript
+function Dog(name) {
+    this.name = name
+}
+
+Dog.prototype.getName = function() {
+    return this.name
+}
+
+Dog.prototype.sayHello = function() {
+    console.log(this.name)
+}
+
+var d = new Dog('Clay')
+d.sayHello() // Clay
+var e = new Dog('Andy')
+e.sayHello() // Andy
+
+console.log(d.sayHello === e.sayHello) // true
+
+```
+
+我們都知道 new 一個物件是要按照設計圖創造一個新物件出來，然後我就可以去呼叫物件內的函式
+
+那如果沒有了 new 該怎麼做 ? 這邊將會從目的來解析
+
+也就是說，我**要宣告一個函式，使其也可以使用另一個函式的內的函式**
+
+- Step 1. 宣告函式，並在內中宣告一個空物件
+
+    ```javascript
+    function Dog(name) {
+        this.name = name
+    }
+
+    Dog.prototype.getName = function() {
+        return this.name
+    }
+
+    Dog.prototype.sayHello = function() {
+        console.log(this.name)
+    }
+
+    var d = new Dog('Clay')
+    d.sayHello() // Clay
+
+    function Dog2(name) {
+        var obj = { }
+    }
+
+    ```
+
+- Step 2. 使用 `.call()`
+
+    ```javascript
+    function Dog(name) {
+        this.name = name
+    }
+
+    Dog.prototype.getName = function() {
+        return this.name
+    }
+
+    Dog.prototype.sayHello = function() {
+        console.log(this.name)
+    }
+
+    var d = new Dog('Clay')
+
+    var b = Dog2('Andy')
+    d.sayHello() // Clay
+
+    function Dog2(name) {
+        var obj = { }
+        Dog.call(obj, name)
+    }
+
+    ```
+
+    意思就是當我執行 Dog2 的時候，都會執行 `Dog.call`，我們都知道 `.call()` 內第一個參數是 `this` 的值，第二個之後的參數可以比照一般的參數
+
+    所以目前因為 `Dog.call(obj, name)` ，那麼 `Dog2('Andy')` 就會是 `obj.name = 'Andy'`，也就是 **obj 增加了一個屬性 name，值為 Andy** !
+
+    所以這個時候如果我在 `Dog.call(obj, name)` 下面寫入 `console.log(obj)`，就會輸出：
+
+    ```javascript
+    {name: 'Andy'}
+    ```
+
+    進行到現在，我們成功的在 `Dog2` 這個克隆函數裡面成功存取到 `Dog` 的建構子，已經完成一半了
+
+    接下來來處理 `Dog` 的 `prototype`
+
+- Step 3. 設定該 `obj` 的 prototype
+
+    ```javascript
+    function Dog(name) {
+        this.name = name
+    }
+
+    Dog.prototype.getName = function() {
+        return this.name
+    }
+
+    Dog.prototype.sayHello = function() {
+        console.log(this.name)
+    }
+
+    var d = new Dog('Clay')
+
+    var b = Dog2('Andy')
+    d.sayHello() // Clay
+
+    function Dog2(name) {
+        var obj = { }
+        Dog.call(obj, name)
+        obj.__proto__ = Dog.prototype
+    }
+
+    ```
+
+    將 obj 的原型鍊與 Dog.prototype 都串聯起來，如此我們就可以使用 Dog.prototype 底下定義的 function 了
+
+- Step 4. 回傳該 obj，如此我們的呼叫都會回傳「原先綁定的建構子部分」與「連結的 prototype」部分
+
+    ```javascript
+    function Dog(name) {
+        this.name = name
+    }
+
+    Dog.prototype.getName = function() {
+        return this.name
+    }
+
+    Dog.prototype.sayHello = function() {
+        console.log(this.name)
+    }
+
+    var d = new Dog('Clay')
+
+    var b = Dog2('Andy')
+    d.sayHello() // Clay
+
+    function Dog2(name) {
+        var obj = { }
+        Dog.call(obj, name)
+        obj.__proto__ = Dog.prototype
+        return obj
+    }
+
+    ```
+
+## 或者，用 new 吧 !
+
+其實你可以直接寫成這樣 :
+
+```javascript
+function Dog(name) {
+    this.name = name
+}
+
+Dog.prototype.getName = function() {
+    return this.name
+}
+
+Dog.prototype.sayHello = function() {
+    console.log(this.name)
+}
+
+var d = new Dog('Clay')
+
+var Dog2 = new Dog('Andy')
+Dog2.sayHello() // Clay
+
+/*
+function Dog2(name) {
+    var obj = { }
+    Dog.call(obj, name)
+    obj.__proto__ = Dog.prototype
+    return obj
+}
+*/
+
+```
+
+## 總結
+
+所以其實 `new` 就是做了以下四件事情
+
+1. 先宣告一個空物件
+2. Call 建構子
+3. 綁 prototype
+4. 回傳該物件
+
+大概就是這樣，言語不一定好懂，請從 Code 來解析
 
 
 
