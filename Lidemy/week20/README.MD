@@ -1,12 +1,12 @@
-576# 前言
+# 前言
 
 由於這週所教的部分筆記有做起來，所以實際上的心得筆記可以回看之前的就好
 
-這週想針對這個月 ( Week16 - Week19 ) 做一些補充，而複習的部分寫心得
+這週想針對這個月 ( Week16 - Week19 ) 有興趣的點做一些補充，
 
 會這樣做的原因是因為，第十六與十八週都是教工具應用，第十七週教 JavaScript 底層運作與程式機制，第十九週談網頁架構
 
-所以本週複習週不會以週區分，而是以主題區分，Sass / Gulp / Webpack 一區，JavaScript 運作一區，MVC / SPA / MPA 架構一區
+所以本週複習週不會以週區分，而是以主題區分，挑自己想複習的重點，Webpack 一區，JavaScript 運作一區
 
 心得筆記由於已經有撰寫，這邊就不再重寫了
 
@@ -31,6 +31,8 @@
 其實 webpack 就是一個打包工具，目的是打包，其餘套件僅僅是附帶的功能，所以如果談套件，那其實 gulp 也可以做到一樣的事情
 
 但打包引入這個功能是 gulp 無法做到的，`export { }` 與 `import { }` 的運行環境是僅在 node.js 才被允許，這點可不能忘記
+
+(是說 Chrome 現在已經可以支援了的樣子)
 
 但通過 webpack 「打包」之後，我們就可以讓瀏覽器裡的 JavaScript 做到這個功能
 
@@ -97,7 +99,7 @@ module.exports = {
   ]
 };
 ```
-https://ithelp.ithome.com.tw/articles/10194056
+- 參考文章 : https://ithelp.ithome.com.tw/articles/10194056
 
 ## loader 與　plugins 的差別 ?
 
@@ -123,9 +125,10 @@ plugins => webpack(loader)
 webpack(loader) => plugins
 ```
 
-https://blog.csdn.net/qq_34629352/article/details/83628917
+- 參考文章 :
 
-https://blog.csdn.net/keliyxyz/article/details/51579078
+  - https://blog.csdn.net/qq_34629352/article/details/83628917
+  - https://blog.csdn.net/keliyxyz/article/details/51579078
 
 ## 如何理解 loader ?
 
@@ -189,23 +192,19 @@ loader 就是設定 webpack 該「怎麼處理」引入的檔案，這邊的檔�
 
 在第十八週我們學過 Data URL 與 CSS Spirits，現在我們來討論前者，webpack 有一個 loader 可以幫我們設定當圖片檔案大小於多少範圍時，可以自動將其轉成 base64，那就是 `url-loader`
 
-而 `file-loader` 則是壓縮圖片，那這時候你可能會想，這兩個 loader 我選一個就行了吧 ? 反正感覺 base64 也會壓縮圖片啊 ?
+而 `file-loader` 則是 webpack 引入檔案用的，而很多小圖就不要用 `file-loader` 來處理，交給 `url-loader` 來轉成 DataURL，，如果是大圖，我們就老老實實發送 Request 去取
 
-不對啊！將圖片轉成 base64 會把圖片檔案變大啊 ! 33% 記得嗎 ?　它不是用來壓縮的啦
+總之先來看看 `url-loader` 的官方說明文件 :
 
-那簡單來說如果要轉成 base64，就不要挑大圖了，如果是大圖，我們就老老實實發送 Request 去取，所以是用 `file-loader` 去壓縮
+> url-loader works like `file-loader`, but can return a DataURL if the file is smaller than a byte limit.
 
-總之我們不用管這麼多，看看 `url-loader` 的官方說明文件 :
-
-url-loader works like `file-loader`, but can return a DataURL if the file is smaller than a byte limit.
-
-這邊說明 `url-loader` 是類似於 `file-loader` 的工作方式．但僅能轉換大小低於限制的圖片
+這邊說明 `url-loader` 是類似於 `file-loader` 的工作方式．對於小於一定大小的檔案，將其轉為 DataURL
 
 ![](./img/1.jpg)
 
-`url-loader`有一個 `fallback` 參數，意思是說「當圖片超過 limit 設定的限制大小時」我們要怎麼做？預設值就是 file-loader，所以我們不用另外設定 file-loader
+`url-loader`有一個 `fallback` 參數，意思是說「當圖片超過 limit 設定的限制大小時」就使用 `file-loader`，所以我們不用另外設定 file-loader，**但是還是要安裝**
 
-> **也就是說，當圖片大小不大的時候，轉為 base64，而超過設定大小時則使用 file-loader 進行壓縮**
+> **也就是說，當圖片大小不大的時候，轉為 DataURL，而超過設定大小時則使用 file-loader 進行處理**
 
 而同樣的，由於預設值包含 `file-loader`，所以在其 `options` 加入 `file-loader` 相關參數也是沒問題的
 
@@ -309,8 +308,7 @@ module.exports = {
 
 所以其實重點在於你看不看得懂該 Plugin 的文件而已
 
-https://blog.csdn.net/weixin_38516688/article/details/86537567
-
+[Webpack 面試集合](https://blog.csdn.net/weixin_38516688/article/details/86537567)
 [官方文件關於 Plugin](https://webpack.docschina.org/plugins)
 [TYSON 大大關於 Webpack 鐵人賽文章](https://ithelp.ithome.com.tw/articles/10201485)
 
@@ -794,9 +792,9 @@ console.log(Object.prototype.__proto__) // null
 2. `spiderA.__proto__.__proto__ === Object.prototype` 為 `true`
 3. `Object.prototype.__proto__ === null` 為 `true`，因為已經是原形鏈的最頂端
 
-這邊我們來探討幾個點：
+但研究到這邊自己還有一個問題 :
 
-## 為什麼 Shelob.__proto__ 是 function，而 Shelob.prototype.__proto__ 是 object.prototype ?
+為什麼 `Shelob.__proto__` 是 `function`，而 `Shelob.prototype.__proto__`是 `object.prototype` ?
 
 先來看一下這段程式碼 :
 
@@ -872,3 +870,140 @@ spiderA.biteElf
 
 - https://github.com/creeperyang/blog/issues/9
 - https://pjchender.blogspot.com/2016/06/javascriptfunction-constructorprototype.html
+
+# this
+
+## .apply() / .call() / .bind　
+
+- `.call()`
+
+  第一個參數就是 this 的值，第二個參數含之後都是函數中的引數
+
+- `.apply()`
+
+  和 `.call()` 一樣，只是參數的部分用一個 Array  `[]` 包起來
+
+  ```javascript
+  'use strict' // 嚴格模式
+  fucntion test(a, b){
+      console.log(this) // 123
+      console.log(a, b) // aa, bb
+  }
+
+  test.call(123,'aa','bb')
+  test.apply(123,['aa','bb'])
+  ```
+
+- `.bind()`
+
+  .bind 內的第一個參數除了代表 this 的值以外，還會將這個值與 this 永遠綁住，如此這個 this 以後就是這個值，即使你用 .apply 或 .call 都無法改變
+
+  ```javascript
+  'use strict' // 嚴格模式
+
+  const obj = {
+      a: 123,
+      test: function() {
+          console.log(this)
+      }
+  }
+
+  const bindTest = obj.test.bind('123')
+
+  bindTest() // 123
+  ```
+
+  bindTest() 中的 this 的值從此就是 123
+
+  像以上的的用法，其實可以看成是 `.bind('123')` 將 `function` 的 `this` 替換回 `'123'` 之後，再回傳整個 `function`
+
+  ```javascript
+  'use strict' // 嚴格模式
+
+  const obj = {
+      a: 123,
+      test: function() {
+          console.log('123')
+      }
+  }
+
+  const bindTest = function() { console.log('123') }
+
+  bindTest() // 123
+  ```
+
+
+
+## this
+
+- 在物件導向的建構式中，this 的指涉是「生成的物件」
+
+  ```javascript
+  function Shelob(name) { 
+      this.name = name
+  }
+
+  Shelob.prototype.biteElf = function() { // Shelob 有了咬精靈的能力
+      console.log("I killed Elf")
+  }
+
+  var spiderA = new Shelob('spiderA') // Shelob 的孩子也繼承了
+  spiderA.biteElf
+
+  ```
+- 在 DOM 物件操作上，this 指的是事件所觸發的對象，可以想像成 e.target，但並不完全相同
+
+  ```javascript
+  document.querySelector('.btn').addEventLister('click',function(){
+      console.log(this) // 指我 click 哪一個 btn
+  })
+  ```
+- 物件底下 this 的值
+
+  記得談 Closure 的時候講到的靜態作用域與動態作用域嗎？靜態作用域著重於函式宣告的位置，而動態作用域則是著重在呼叫函式的位置，現在我們來看看 `this` 的**呼叫方法**會給它的指向帶來何種影響：
+
+  一個簡單的技巧
+
+  ```javascript
+  'use strict' // 嚴格模式
+
+  const obj = {
+      a: 123,
+      inner: {
+          test: function() {
+              console.log(this)
+          }
+      }
+  }
+
+  obj.inner.test() // 可以看成 this 就是 obj.inner.test.call(obj.inner)
+
+  var func = obj.inner.test
+  func() // 可以看成 func.call(undefined)，因為前面是 global，輸出 undefined
+  ```
+  
+  經由這樣的判斷方式，可以得到幾個結論：
+
+  1. 函式的直接呼叫 (包括放入變數呼叫)，this 都是指向全域
+  2. 函式若放在物件內使用，則 this 就會指向物件
+
+# 總結
+
+以 Week16 - Week19 中要挑重點複習，就如同以上，工具我會挑 Webpack 為主，gulp 為輔，JavaScript 概念沒得談，必須都得掌握住，但因為都是基於同一套運作機制，相對也省力許多。而網頁架構概念藉由老師的文章了解其來龍去脈也非常好理解，這週一樣欠缺一些實作，這週週末也來不及玩拖延黑客松。
+
+說這麼多，不如來談談 Week16 - Week19 的學習心得
+
+首先先講共通點，這四週的學習內容很強調自身的規劃，比如說第十六週其實可以更努力去了解 PostCSS，另外就是 Cache 也可能很快就忘記，因為缺少實作出 Cache 的要求，所以定義記一記很快就又忘了。
+
+第十七週講解得非常全面，無懈可擊，這一周是我學得最起勁的一週，很多背後的知識想去了解去求證，除了老師的觀點與教授外，也會去查閱別人是怎麼介紹的，這週非常棒。
+
+第十八週的 gulp 與 webpack 就看同學們本身想要理解到多深，這邊我個人是覺得，讓需求去引領這些工具就好，有用到，想用到，先 Google 這工具能不能解決你想解決的問題，能，就學，不能，就先放著也無妨。我個人是深信沒用到就會忘，所以我覺得這週只是引入門而已，之後的作業應該都可以搭配這些工具，問題不大，不用急著這四週就學到滿。
+
+第十九週，我個人最混的一週，CS75 也才剛開始聽，老師提供的兩篇文章剛看完就硬幹作業了，其實我抓不太到這一週的重點，我其實覺得這一週的作業如果要求得再高一點也是很合理的，我相信老師應該有想過，但後來應該是有所考量才決定不做細部的要求，比如說 XSS，我就因為偷懶而沒有做，但其實就現下的標準而言，我沒有理由不做，只是單純因為老師沒有要求，而我就覺得不做好像也沒關係。其實後來想想這是不對的，我又犯老毛病，非得人家要求了我才想做，對自己所做的產品沒有想完善的理由，這樣對作業的心態就有點半應付了。
+
+個人愚見是覺得這四週還是可以歸納的，比如說工具兩週一個部分，JavaScript 底層運作與網頁概論與架構一個部分，而我發現如果當你研究 webpack 的時候，會為了理解 loader 而接觸很多的套件，這時候再順勢帶出 Sass / bebal / minify 等似乎也是不錯的選擇，當然在原本課程中於第十六週學會使用 Sass 並理解其編譯成 css 的原理，對於理解第十八週 webpack loader 與 gulp 的打包 / 編譯過程來說也是相當有助益。
+
+另外就是感覺一些被放在挑戰題的部分，比如說 PostCSS 與 webpack loader 的使用等，在求職的時候感覺似乎都變成必須要會的了，其實這我也不是很確定，雖然我同意工具不用選擇，可以都學，但比都學更重要的是，真的需要用到才學，當然講是這樣講，若不在開發 (或作業) 的時候主動嘗試去用，那也是空談，死背硬記的定義與格式，一但不是完全懂，那麼很容易就會忘了。
+
+但我想或許老師也是顧慮到如果真的這樣做，作業量可能又會太大，難以取捨，而且如果要針對學生會 webpack loader / plugins，這樣的作業真的也不好開。不論如何，課程走到現在，漸漸明白老師的要求的確重要，但要更好，重點還是自己對自己的要求，從目前看下來，算是勉強還行，低空飛過。課程剩下最後四週，繼續加油。
+  
