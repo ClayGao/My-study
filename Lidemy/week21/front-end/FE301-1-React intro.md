@@ -1,4 +1,4 @@
-# 談談 React 之前，先用 jQuery 寫 todol list
+# 談談 React 之前，先用 jQuery 寫 todo list
 
 這邊看教學影片 live coding 就好，就不贅述，只標記重點 :
 
